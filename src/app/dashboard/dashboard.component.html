@@ -1,0 +1,66 @@
+<div class="container">
+    <div class="header">
+        <app-header></app-header>
+    </div>
+</div>
+<div class="main-container">
+    <div class="side-nav">
+        <app-sidebar></app-sidebar>
+    </div>
+    <div class="main">
+        <div class="heading">
+            <h3>Dashboard</h3>
+        </div>
+        <div class="row align-items-center">
+            <div class="col heading-title">
+                <h4>LHO Wise List</h4>
+            </div>
+            <div class="col heading-actions text-right">
+                <button class="btn btn-primary">Download</button>
+                <input type="text" class="form-control search-bar d-inline-block" placeholder="Search">
+            </div>
+        </div>
+        <div class="row">
+            <div class="card">
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>LHO</th>
+                                <th>Total Locations</th>
+                                <th>Online</th>
+                                <th>Offline</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Add table rows here -->
+                            <tr (click)="navigateToSiteDetails()">
+                                <td>LHO 1</td>
+                                <td>100</td>
+                                <td>80</td>
+                                <td>20</td>
+                                <td>80%</td>
+                            </tr>
+                            <tr (click)="navigateToSiteDetails()">
+                                <td>LHO 2</td>
+                                <td>120</td>
+                                <td>110</td>
+                                <td>10</td>
+                                <td>91.67%</td>
+                            </tr>
+                            <!-- Add more rows as needed -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+<footer class="footer">
+    Powered by <span class="build">Build</span><span class="int">INT</span>
+  </footer>
+    </div>
+    
+</div>
+
+

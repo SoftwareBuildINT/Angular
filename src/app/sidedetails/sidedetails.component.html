@@ -1,0 +1,99 @@
+<div class="container">
+  <div class="header">
+    <app-header></app-header>
+  </div>
+
+  <div class="main-container">
+    <div class="side-nav">
+      <app-sidebar></app-sidebar>
+    </div>
+    <div class="main">
+      <div class="heading">
+        <h3>Site Details</h3>
+      </div>
+      <div class="row">
+        <!-- Card 1 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="card-content">
+              <h4 class="card-title">Total Locations</h4>
+              <div class="card-info">
+                <p class="card-count">{{ siteList.length }}</p>
+                <i class="fas fa-map-marker-alt total-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="card-content">
+              <h4 class="card-title">Online</h4>
+              <div class="card-info">
+                <p class="card-count">{{ onlineCount }}</p>
+                <i class="fas fa-map-marker-alt online-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="card-content">
+              <h4 class="card-title">Offline</h4>
+              <div class="card-info">
+                <p class="card-count">{{ offlineCount }}</p>
+                <i class="fas fa-map-marker-alt offline-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="site-list-header">
+          <h3>Site List</h3>
+          <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm">
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="row">
+        <div class="card1">
+          <table class="site-list-table">
+            <thead>
+              <tr>
+                <th>ATM ID</th>
+                <th>Site Name</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Last Data Received</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let site of filteredSites()" (click)="navigateToDetails(site)">
+                <td>{{ site.ATM_ID }}</td>
+                <td>{{ site.unitname }}</td>
+                <td>{{ site.city }}</td>
+                <td>{{ site.state }}</td>
+                <td>{{ site.LastSuccessDateTime }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="pagination-controls">
+        <button (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
+        <span>Page {{ currentPage }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage * itemsPerPage >= siteList.length">Next</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Powered by <span class="build">Build</span><span class="int">INT</span></p>
+    </footer>
+  </div>
+</div>

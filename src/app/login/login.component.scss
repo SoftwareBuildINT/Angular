@@ -1,0 +1,121 @@
+.login-container {
+  display: flex;
+  height: 100vh; /* Full viewport height */
+  flex-direction: column; /* Stacks content vertically on smaller screens */
+  
+  @media (min-width: 768px) {
+    flex-direction: row; /* Side-by-side on larger screens */
+  }
+}
+
+.login-left,
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-left {
+  background: linear-gradient(135deg, 
+    rgba(239, 48, 36, 0.5) 0%,      
+    rgba(2, 27, 121, 0.5) 74%,      
+    rgba(5, 117, 230, 0.5) 94%      
+  );
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
+}
+
+.welcome-image {
+  max-width: 100%; /* Adjust if necessary */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.login-right {
+  background-color: #fff;
+  flex-direction: column; /* Align items vertically */
+  text-align: center; /* Center content horizontally */
+  padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 15px;
+  }
+}
+
+.logo-container {
+  margin-bottom: 20px; /* Space between logo and form */
+  
+  @media (max-width: 768px) {
+    margin-bottom: 10px;
+  }
+}
+
+.sbi-logo {
+  max-width: 150px; /* Adjust logo size if needed */
+  height: auto; /* Maintain aspect ratio */
+  
+  @media (max-width: 480px) {
+    max-width: 120px; /* Adjust size for smaller screens */
+  }
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Space between form elements */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  text-align: left; /* Aligns label to the left */
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  width: 100%;
+  height: 50%; 
+}
+
+.btn {
+  width: 100%;
+  height: 35px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-primary {
+  margin-bottom: 80px; /* Add margin to the bottom of the login button */
+  
+  @media (max-width: 768px) {
+    margin-bottom: 40px;
+  }
+}
+
+.footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: #777;
+  
+  @media (max-width: 480px) {
+    font-size: 12px; /* Smaller font on very small screens */
+  }
+}
+
+.build {
+  font-weight: bold;
+  color: black;
+}
+
+.int {
+  font-weight: bold;
+  color: green;
+}

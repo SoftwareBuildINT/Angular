@@ -1,0 +1,154 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-right: calc(var(--bs-gutter-x) * 0.5);
+    padding-left: calc(var(--bs-gutter-x) * 0.5);
+    margin-left: 140px;
+    margin-right: auto;
+
+    @media (max-width: 768px) {
+        margin-left: 0;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .main-container {
+        display: flex;
+        flex: 1;
+        overflow: auto;
+
+        @media (max-width: 768px) {
+            flex-direction: column;
+        }
+
+        .side-nav {
+            width: 80px; // Sidebar width
+
+            @media (max-width: 768px) {
+                width: 100%;
+                height: auto;
+                display: flex;
+                justify-content: center;
+                padding: 10px 0;
+            }
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px;
+            margin-left: 0; // Remove margin to align with the sidebar
+
+            @media (max-width: 768px) {
+                padding: 10px;
+            }
+
+            .heading {
+                margin-top: 40px; // Adjust if needed
+                margin-bottom: 10px; // Adjust spacing between heading and content
+
+                @media (max-width: 768px) {
+                    margin-top: 20px;
+                    text-align: center;
+                }
+            }
+
+            .card-body {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-top: 20px;
+
+                @media (max-width: 768px) {
+                    padding: 15px;
+                    margin-top: 10px;
+                }
+
+                .user-form {
+                    .row {
+                        display: flex;
+                        margin-bottom: 15px;
+                        flex-wrap: wrap;
+
+                        .form-group {
+                            flex: 1;
+                            margin-right: 15px;
+
+                            &:last-child {
+                                margin-right: 0;
+                            }
+
+                            @media (max-width: 768px) {
+                                flex: 1 1 100%;
+                                margin-right: 0;
+                                margin-bottom: 10px;
+                            }
+
+                            label {
+                                display: block;
+                                margin-bottom: 5px;
+                                font-weight: bold;
+                            }
+
+                            input {
+                                width: 100%;
+                                padding: 8px;
+                                border: 1px solid #ddd;
+                                border-radius: 4px;
+                            }
+                        }
+                    }
+
+                    .download-btn {
+                        padding: 10px 20px;
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        display: block;
+                        margin: 20px auto;
+
+                        &:hover {
+                            background-color: #0056b3;
+                        }
+
+                        @media (max-width: 768px) {
+                            width: 100%;
+                            margin: 15px 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+
+    @media (max-width: 768px) {
+        margin-top: 20px;
+        font-size: 12px;
+    }
+
+    .build {
+        font-weight: bold;
+        color: black;
+    }
+
+    .int {
+        font-weight: bold;
+        color: green;
+    }
+}

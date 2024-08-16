@@ -1,0 +1,153 @@
+// General Container Styles
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding-top: 50px; // Adjust for the fixed header height
+    padding-left: 210px; // Adjust for sidebar width
+    box-sizing: border-box;
+
+    .main-container {
+        display: flex;
+        flex: 1;
+        overflow: auto;
+
+        .main {
+            flex: 1;
+            padding: 20px;
+
+            .heading {
+                margin-bottom: 20px;
+                
+            }
+
+            .card-body {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+
+                .user-form {
+                    .row {
+                        display: flex;
+                        flex-wrap: wrap;
+                        margin-bottom: 15px;
+
+                        .form-group {
+                            flex: 1;
+                            margin-right: 15px;
+
+                            &:last-child {
+                                margin-right: 0;
+                            }
+
+                            label {
+                                display: block;
+                                margin-bottom: 5px;
+                                font-weight: bold;
+                                color: #333;
+                            }
+
+                            input {
+                                width: 100%;
+                                padding: 8px;
+                                border: 1px solid #ddd;
+                                border-radius: 4px;
+                                box-sizing: border-box;
+                            }
+                        }
+                    }
+
+                    .submit-btn {
+                        padding: 10px 20px;
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        display: block;
+                        margin: 20px auto;
+
+                        &:hover {
+                            background-color: #0056b3;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Footer Styles
+.footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #666;
+    padding-left: 30px; // Adjust for sidebar width
+
+    .build {
+        font-weight: bold;
+        color: black;
+    }
+
+    .int {
+        font-weight: bold;
+        color: green;
+    }
+}
+
+// Media Queries for Responsive Design
+@media (max-width: 1200px) {
+    .container {
+        padding-left: 200px; // Adjust padding for medium screens
+    }
+
+    .main-container {
+        .main {
+            padding: 15px;
+        }
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        padding-left: 0; // Remove padding for smaller screens
+    }
+
+    .main-container {
+        flex-direction: column;
+        padding: 10px;
+
+        .main {
+            padding: 10px;
+        }
+    }
+
+    .footer {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding-top: 50px; // Ensure header remains above content
+    }
+
+    .main-container {
+        .main {
+            padding: 10px;
+        }
+    }
+
+    .footer {
+        padding-left: 0;
+    }
+}
+

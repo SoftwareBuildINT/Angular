@@ -1,0 +1,30 @@
+<div class="login-container">
+  <div class="login-left">
+    <!-- Centered image -->
+    <img src="assets/images/hitachi logo.png" alt="Welcome Image" class="welcome-image">
+  </div>
+
+  <div class="login-right">
+    <div class="logo-container">
+      <!-- SBI logo -->
+      <img src="assets/images/sbi.png" alt="SBI Logo" class="sbi-logo">
+    </div>
+    <!-- Form content -->
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
+      <div class="form-group">
+        <label for="username" class="form-label">Username:</label>
+        <input id="username" name="username" [(ngModel)]="username" required class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="password" class="form-label">Password:</label>
+        <input id="password" name="password" [(ngModel)]="password" type="password" required class="form-control">
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+
+    <!-- Footer -->
+    <footer class="footer">
+      Powered by <span class="build">Build</span><span class="int">INT</span>
+    </footer>
+  </div>
+</div>

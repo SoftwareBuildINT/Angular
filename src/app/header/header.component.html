@@ -1,0 +1,22 @@
+<div class="header">
+  <div class="logo">
+    <img src="assets/images/Hitachi-removebg-preview.png" alt="Company Logo">
+  </div>
+  <div class="sidebar-toggle">
+    <button class="toggle-button" (click)="toggleSidebar()">☰</button>
+  </div>
+  <div class="user">
+    <div class="logo sbi-logo-container">
+      <img src="assets/images/sbi.png" alt="SBI Logo" class="sbi-logo">
+    </div>
+    <div class="user-name">Mahi</div>
+    <div class="user-image"></div>
+    <div class="dropdown">
+      <button class="dropdown-toggle" (click)="toggleDropdown()"></button>
+      <div class="dropdown-menu" [class.show]="isDropdownOpen">
+        <a class="dropdown-item">Admin</a>
+        <a href="#" class="dropdown-item" (click)="selectItem('Logout')">Logout</a>
+      </div>
+    </div>
+  </div>
+</div>

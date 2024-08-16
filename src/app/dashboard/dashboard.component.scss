@@ -1,0 +1,230 @@
+// Main Container
+.main-container {
+  display: flex;
+  margin-top: 50px; // Space for the fixed header
+}
+
+// Sidebar Styles
+.side-nav {
+  width: 210px; // Match sidebar width
+  z-index: 999; // Ensure sidebar is below header
+  position: fixed; // Ensure the sidebar stays fixed
+  top: 50px; // Align below the header
+  left: 0; // Align to the left of the container
+  height: calc(100vh - 50px); // Full viewport height minus header height
+  overflow-y: auto; // Allow scrolling if content overflows
+  background-color: #ffffff; // Match sidebar background
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); // Match sidebar shadow
+
+  .sidebar-nav {
+    list-style: none;
+    padding: 0;
+
+    .nav-item {
+      margin-top: 20px;
+      margin-bottom: 2.5rem;
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        color: #333333;
+        font-weight: 500;
+        padding: 0.75rem;
+        border-radius: 0.25rem;
+        transition: background-color 0.3s, color 0.3s;
+
+        &:hover, &.active {
+          background-color: rgba(5, 117, 230, 0.35);
+          color: #0575E6;
+        }
+
+        i {
+          margin-right: 0.5rem;
+          font-size: 1.2rem;
+        }
+      }
+    }
+  }
+}
+
+// Main Content Styles
+.main {
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 210px; // Adjust based on sidebar width
+  position: relative;
+
+  .heading {
+    padding: 20px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; // Ensure items are spaced between each other
+    padding: 10px 0;
+  }
+
+  .heading-title {
+    flex: 1;
+    text-align: left; // Align title to the left
+    margin-right: 20px; // Space between title and actions
+  }
+
+  .heading-actions {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end; // Align actions to the right
+    gap: 10px; // Space between button and search bar
+
+    .btn {
+      margin-right: 10px;
+      padding: 5px 10px; // Reduce the height of the button
+      height: auto; // Adjust the height
+      font-size: 14px; // Reduce the font size
+    }
+
+    .search-bar {
+      width: 200px;
+      padding: 5px 10px; // Reduce the height of the search bar
+      height: auto; // Adjust the height
+      font-size: 14px; // Reduce the font size
+    }
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 15px 0;
+  }
+
+  .card-body {
+    padding: 20px;
+  }
+
+  .table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    border-collapse: collapse;
+
+    th, td {
+      padding: 8px 12px;
+      text-align: center; /* Center text in table cells */
+    }
+
+    td {
+      border-bottom: 1px solid #dee2e6; /* Keep the lines between rows */
+    }
+
+    thead {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+
+    tbody tr:hover {
+      background-color: #f1f1f1;
+    }
+  }
+
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .footer {
+    padding: 20px;
+    text-align: center;
+    margin-top: 10px; /* Add some space above the footer */
+    font-size: 16px;
+    font-weight: normal;
+
+    .build {
+      font-weight: bold;
+      color: #000; /* Black color for "Build" */
+    }
+
+    .int {
+      font-weight: bold;
+      color: #28a745; /* Green color for "INT" */
+    }
+  }
+}
+
+// Media Queries for responsiveness
+@media (max-width: 1200px) {
+  .main {
+    margin-left: 200px; // Adjust margin for medium screens
+  }
+
+  .side-nav {
+    width: 200px; // Adjusted width for medium screens
+  }
+}
+
+@media (max-width: 992px) {
+  .main {
+    margin-left: 0; // Remove left margin
+  }
+
+  .side-nav {
+    width: 100%; // Full width for smaller screens
+    height: auto; // Allow height to adjust based on content
+    position: static; // Remove fixed positioning
+    transform: translateX(-100%); // Hide sidebar by default
+    z-index: 998;
+    overflow-y: hidden;
+
+    &.active {
+      transform: translateX(0); // Show sidebar
+      overflow-y: auto;
+    }
+  }
+
+  .row {
+    flex-direction: column; // Stack row items vertically
+    align-items: flex-start; // Align items to the start (left)
+    padding: 15px;
+  }
+
+  .heading-title {
+    margin-bottom: 30px;
+    text-align: left; // Align title to the left
+    width: 100%;
+  }
+
+  .heading-actions {
+    justify-content: flex-start; // Align actions to the start (left)
+    width: 100%;
+    gap: 10px; // Space between button and search bar
+
+    .search-bar {
+      width: 100%; // Full width for smaller screens
+    }
+
+    .btn {
+      width: auto; // Adjust button width
+      margin-right: 0;
+      margin-bottom: 10px;
+      padding: 5px 10px; // Reduce the height of the button
+      height: auto; // Adjust the height
+      font-size: 14px; // Reduce the font size
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 10px; // Adjust padding for smaller screens
+  }
+
+  .side-nav {
+    width: 100%;
+    top: 0;
+    height: 100vh;
+  }
+
+  .heading-actions {
+    flex-direction: column;
+  }
+}

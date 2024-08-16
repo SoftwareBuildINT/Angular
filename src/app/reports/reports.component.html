@@ -1,0 +1,51 @@
+<div class="container">
+    <div class="header">
+        <app-header></app-header>
+    </div>
+
+    <div class="main-container">
+        <div class="side-nav">
+            <app-sidebar></app-sidebar>
+        </div>
+        <div class="main">
+            <div class="heading">
+                <h3 class="heading-text">Reports</h3>
+            </div>
+            <div class="card-body">
+                <form class="user-form">
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="endDate">Start Date</label>
+                            <input type="date" id="endDate" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date</label>
+                            <input type="date" id="endDate" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label for="atmId">ATM ID</label>
+                            <select id="atmId" class="form-control">
+                                <option value="" disabled selected>Select ATM ID</option>
+                                <!-- Add options here -->
+                                <option value="1">ATM ID 1</option>
+                                <option value="2">ATM ID 2</option>
+                                <option value="3">ATM ID 3</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                        </div>
+                    </div>
+
+                    <button class="download-btn">Download</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        Powered by <span class="build">Build</span><span class="int">INT</span>
+    </footer>
+</div>
