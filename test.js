@@ -30,6 +30,7 @@ app.put('/add-atmid', (req, res) => {
   // Ensure ATMID is treated as an array
   const atmidsToAdd = Array.isArray(ATMID) ? ATMID : [ATMID];
 
+  // Step 1: Retrieve existing ATMIDs for the given LHO_Name
   connection.query('SELECT SIte_ID, ATMID FROM SiteDetails WHERE LHO_Name = ?', [LHO_Name], (err, results) => {
     if (err) {
       console.error('Database query error:', err);
@@ -40,6 +41,7 @@ app.put('/add-atmid', (req, res) => {
       return res.status(404).json({ message: 'LHO_Name does not exist. Please add LHO_Name first.' });
     }
 
+    // Extract the existing ATMIDs
     let existingATMID = [];
 
     try {
@@ -56,7 +58,7 @@ app.put('/add-atmid', (req, res) => {
       existingATMID = [];
     }
 
-    // Add new ATMIDs to the existing list without duplicates
+    // Step 2: Add new ATMIDs to the existing list without duplicates
     atmidsToAdd.forEach(atmid => {
       if (!existingATMID.includes(atmid)) {
         existingATMID.push(atmid);
@@ -66,6 +68,7 @@ app.put('/add-atmid', (req, res) => {
     // Convert updated array back to JSON format
     const updatedATMID = JSON.stringify(existingATMID);
 
+    // Perform the update query
     connection.query('UPDATE SiteDetails SET ATMID = ? WHERE SIte_ID = ?', [updatedATMID, results[0].SIte_ID], (err) => {
       if (err) {
         console.error('Error updating record:', err);
