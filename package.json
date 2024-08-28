@@ -27,12 +27,17 @@
     "angular-font-awesome": "^3.1.2",
     "apexcharts": "^3.49.2",
     "bootstrap": "^5.3.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
     "i": "^0.3.7",
+    "moment": "^2.30.1",
+    "mysql2": "^3.11.0",
     "ng-apexcharts": "^1.11.0",
     "ngx-scrollbar": "^15.0.1",
     "rxjs": "~7.8.1",
     "screenfull": "^6.0.2",
     "tslib": "^2.6.3",
+    "xlsx": "^0.18.5",
     "zone.js": "~0.14.7"
   },
   "devDependencies": {

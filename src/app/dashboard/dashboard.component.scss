@@ -71,6 +71,25 @@
     margin-right: 20px; // Space between title and actions
   }
 
+  .add-button-container {
+    margin-top: 15px; /* Add some space above the button */
+    margin-right: 20px; /* Align to the right */
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+    
+    .btn-add {
+      padding: 8px 16px; /* Adjust the padding of the button */
+      font-size: 14px; /* Adjust the font size */
+      background-color: #007bff; /* Button background color */
+      color: #fff; /* Button text color */
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+  }
+
   .heading-actions {
     flex: 1;
     display: flex;
@@ -151,6 +170,99 @@
   }
 }
 
+// Modal Styles
+.modal {
+  display: none;
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  z-index: 1050;
+
+  &.show {
+    display: block;
+  }
+
+  .modal-dialog {
+    max-width: 500px;
+    margin: 50px auto;
+  }
+
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+
+    .modal-title {
+      margin-right: auto;
+      font-size: 1.25rem;
+      font-weight: 500;
+    }
+
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      font-size: 1.5rem;
+      color: #000;
+      cursor: pointer;
+      background: transparent;
+      border: none;
+    }
+  }
+
+  .modal-body {
+    padding: 15px;
+
+    .input-group {
+      display: flex;
+      align-items: center;
+
+      .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .input-group-append {
+        .btn {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+          background-color: transparent;
+          border: none;
+          font-size: 1.25rem;
+          color: #000;
+          cursor: pointer;
+          padding: 0 10px; /* Adjust padding as needed */
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding: 15px 20px;
+    border-top: 1px solid #dee2e6;
+
+    .btn {
+      margin-left: 10px;
+    }
+  }
+}
+
 // Media Queries for responsiveness
 @media (max-width: 1200px) {
   .main {
@@ -194,21 +306,23 @@
   }
 
   .heading-actions {
-    justify-content: flex-start; // Align actions to the start (left)
-    width: 100%;
-    gap: 10px; // Space between button and search bar
-
-    .search-bar {
-      width: 100%; // Full width for smaller screens
-    }
-
+    flex: 1;
+    display: flex;
+    justify-content: flex-start; /* Align actions to the start (left) */
+    gap: 10px; /* Space between buttons and search bar */
+  
     .btn {
-      width: auto; // Adjust button width
-      margin-right: 0;
-      margin-bottom: 10px;
-      padding: 5px 10px; // Reduce the height of the button
-      height: auto; // Adjust the height
-      font-size: 14px; // Reduce the font size
+      margin-right: 10px;
+      padding: 5px 10px; /* Reduce the height of the button */
+      height: auto; /* Adjust the height */
+      font-size: 14px; /* Reduce the font size */
+    }
+  
+    .search-bar {
+      width: 100%; /* Full width for smaller screens */
+      padding: 5px 10px; /* Reduce the height of the search bar */
+      height: auto; /* Adjust the height */
+      font-size: 14px; /* Reduce the font size */
     }
   }
 }

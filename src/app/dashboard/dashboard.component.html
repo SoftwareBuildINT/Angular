@@ -1,66 +1,96 @@
 <div class="container">
-    <div class="header">
-        <app-header></app-header>
-    </div>
+  <div class="header">
+    <app-header></app-header>
+  </div>
 </div>
 <div class="main-container">
-    <div class="side-nav">
-        <app-sidebar></app-sidebar>
+  <div class="side-nav">
+    <app-sidebar></app-sidebar>
+  </div>
+  <div class="main">
+    <div class="heading">
+      <h3>Dashboard</h3>
     </div>
-    <div class="main">
-        <div class="heading">
-            <h3>Dashboard</h3>
+    <div class="row align-items-center">
+      <div class="col heading-title">
+        <h4>LHO Wise List</h4>
+      </div>
+      <div class="col heading-actions text-right">
+        <button class="btn btn-primary">Download</button>
+        <input type="text" class="form-control search-bar d-inline-block" placeholder="Search">
+      </div>
+    </div>
+    <div class="row">
+      <div class="card">
+        <div class="card-body">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>LHO</th>
+                <th>Total Locations</th>
+                <th>Online</th>
+                <th>Offline</th>
+                <th>Percentage</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr (click)="navigateToSiteDetails()">
+                <td>LHO 1</td>
+                <td>100</td>
+                <td>80</td>
+                <td>20</td>
+                <td>80%</td>
+              </tr>
+              <tr (click)="navigateToSiteDetails()">
+                <td>LHO 2</td>
+                <td>120</td>
+                <td>110</td>
+                <td>10</td>
+                <td>91.67%</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="row align-items-center">
-            <div class="col heading-title">
-                <h4>LHO Wise List</h4>
-            </div>
-            <div class="col heading-actions text-right">
-                <button class="btn btn-primary">Download</button>
-                <input type="text" class="form-control search-bar d-inline-block" placeholder="Search">
-            </div>
-        </div>
-        <div class="row">
-            <div class="card">
-                <div class="card-body">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>LHO</th>
-                                <th>Total Locations</th>
-                                <th>Online</th>
-                                <th>Offline</th>
-                                <th>Percentage</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Add table rows heress -->
-                            <tr (click)="navigateToSiteDetails()">
-                                <td>LHO 1</td>
-                                <td>100</td>
-                                <td>80</td>
-                                <td>20</td>
-                                <td>80%</td>
-                            </tr>
-                            <tr (click)="navigateToSiteDetails()">
-                                <td>LHO 2</td>
-                                <td>120</td>
-                                <td>110</td>
-                                <td>10</td>
-                                <td>91.67%</td>
-                            </tr>
-                            <!-- Add more rows as needed -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <!-- Footer -->
-<footer class="footer">
-    Powered by <span class="build">Build</span><span class="int">INT</span>
-  </footer>
+      </div>
     </div>
     
+    <div class="row">
+      <div class="col text-right add-button-container">
+        <button class="btn btn-success" (click)="openModal()">Add</button>
+      </div>
+    </div>
+    <footer class="footer">
+      Powered by <span class="build">Build</span><span class="int">INT</span>
+    </footer>
+  </div>
 </div>
 
+
+<!-- Modal Structure -->
+<div class="modal" tabindex="-1" role="dialog" [ngClass]="{'show d-block': showModal}" (click)="closeModal()">
+  <div class="modal-dialog" role="document" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add LHO</h5>
+        <button type="button" class="close" (click)="closeModal()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form (submit)="saveLho()">
+          <div class="input-group">
+            <input type="text" class="form-control" id="lhoName" placeholder="Enter LHO Name" [(ngModel)]="lhoName" name="lhoName" (keyup.enter)="saveLho()">
+            <div class="input-group-append">
+              <button type="button" class="btn btn-secondary" (click)="clearInput()">Cancel</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="saveLho()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 

@@ -9,29 +9,25 @@ import { catchError, map } from 'rxjs/operators';
 export class DataService {
   private loginUrl = 'http://10.30.100.124:3328/login'; // Login API URL
   private siteListUrl = 'https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'; // Site list API URL
+  private dashboardUrl = 'http://localhost:5000/dashboard'; // Dashboard API URL
 
   constructor(private http: HttpClient) {}
 
   // Method to log in and store the token
-  login(payload: { EmailId: string, password: string }): Observable<any> {
+  login(payload: { EmailId: string; password: string }): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
     });
 
     return this.http.post<any>(this.loginUrl, payload, { headers }).pipe(
-      map(response => {
-        // Log the response to the console
+      map((response) => {
         console.log('Login response:', response);
-
-        // Check if the token exists in the response
         if (response.token) {
-          // Store the token in local storage
           localStorage.setItem('token', response.token);
           console.log('Token stored:', response.token);
         } else {
           console.warn('Token not found in response');
         }
-
         return response;
       }),
       catchError(this.handleError)
@@ -39,20 +35,70 @@ export class DataService {
   }
 
   // Method to get the site list
- getSiteList(): Observable<any> {
-  return this.http.get<any>(this.siteListUrl).pipe(
-    catchError(this.handleError)
-  );
-}
+  getSiteList(): Observable<any> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<any>(this.siteListUrl, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Method to get dashboard data
+  getDashboardData(): Observable<any> {
+    const headers = this.getAuthHeaders();
+
+    return this.http.get<any>(this.dashboardUrl, { headers }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  // Method to create the authorization header
+  private getAuthHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    let headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    return headers;
+  }
+
+  // Method to check if the user is authenticated
+  isAuthenticated(): boolean {
+    const token = localStorage.getItem('token');
+    return !!token; // Return true if token exists, false otherwise
+  }
 
   // Error handling method
   private handleError(error: HttpErrorResponse): Observable<never> {
     console.error('An error occurred:', error);
-    if (error.error) {
-      console.error('Error details:', error.error);
+
+    let errorMessage = 'An unknown error occurred!';
+    if (error.error instanceof ErrorEvent) {
+      // A client-side or network error occurred
+      errorMessage = `Error: ${error.error.message}`;
+    } else {
+      // The backend returned an unsuccessful response code
+      switch (error.status) {
+        case 401:
+          errorMessage = 'Unauthorized: Invalid credentials or token';
+          break;
+        case 404:
+          errorMessage = 'Not Found: The requested resource could not be found';
+          break;
+        case 500:
+          errorMessage = 'Server Error: Please try again later';
+          break;
+        default:
+          errorMessage = error.message || 'Server error';
+          break;
+      }
     }
-    return throwError(
-      error.status === 401 ? 'Unauthorized: Invalid credentials or token' : error.message || 'Server error'
-    );
+
+    console.error('Error details:', errorMessage);
+    return throwError(errorMessage);
   }
 }

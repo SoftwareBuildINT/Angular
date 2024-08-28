@@ -7,7 +7,7 @@ export interface Site {
   unitname: string;
   city: string;
   state: string;
-  LastSuccessDateTime?: string;
+  SiteStatus?: string;
 }
 
 @Component({
@@ -24,6 +24,15 @@ export class SidedetailsComponent implements OnInit {
   // Pagination properties
   currentPage: number = 1;
   itemsPerPage: number = 10;
+
+  // Modal properties
+  showModal: boolean = false;
+  newSite: Site = {
+    ATM_ID: '',
+    unitname: '',
+    city: '',
+    state: '',
+  };
 
   constructor(private router: Router, private dataService: DataService) {}
 
@@ -45,11 +54,15 @@ export class SidedetailsComponent implements OnInit {
               unitname: site.unitname,
               city: site.city,
               state: site.state,
-              LastSuccessDateTime: site.LastSuccessDateTime 
+              SiteStatus: site.SiteStatus 
             }));
 
-            this.onlineCount = this.siteList.length - this.onlineCount;
+            this.onlineCount = this.siteList.filter(site => site.SiteStatus === 'ONLINE').length;
+            this.offlineCount = this.siteList.filter(site => site.SiteStatus === 'OFFLINE').length;
+
             console.log('Site list fetched and formatted successfully:', this.siteList);
+            console.log('Online count:', this.onlineCount);
+            console.log('Offline count:', this.offlineCount);
           } else {
             console.error('Unexpected response format:', parsedData);
           }
@@ -95,5 +108,19 @@ export class SidedetailsComponent implements OnInit {
 
   navigateToDetails(site: Site): void {
     this.router.navigate(['/liveview'], { queryParams: { atmId: site.ATM_ID } });
+  }
+
+  openAddModal(): void {
+    this.showModal = true;
+  }
+
+  closeAddModal(): void {
+    this.showModal = false;
+  }
+
+  saveSite(): void {
+    // Logic to save the new site
+    console.log('New site:', this.newSite);
+    this.closeAddModal();
   }
 }

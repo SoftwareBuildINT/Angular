@@ -54,6 +54,7 @@
         <div class="site-list-header">
           <h3>Site List</h3>
           <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm">
+          <button class="add-button" (click)="openAddModal()">Add New Site</button>
         </div>
       </div>
 
@@ -67,7 +68,7 @@
                 <th>Site Name</th>
                 <th>City</th>
                 <th>State</th>
-                <th>Last Data Received</th>
+                <th>Site Status</th>
               </tr>
             </thead>
             <tbody>
@@ -76,7 +77,7 @@
                 <td>{{ site.unitname }}</td>
                 <td>{{ site.city }}</td>
                 <td>{{ site.state }}</td>
-                <td>{{ site.LastSuccessDateTime }}</td>
+                <td>{{ site.SiteStatus }}</td>
               </tr>
             </tbody>
           </table>
@@ -88,6 +89,22 @@
         <button (click)="previousPage()" [disabled]="currentPage === 1">Previous</button>
         <span>Page {{ currentPage }}</span>
         <button (click)="nextPage()" [disabled]="currentPage * itemsPerPage >= siteList.length">Next</button>
+      </div>
+    </div>
+
+    <!-- Add Site Modal -->
+    <div class="modal" *ngIf="showModal">
+      <div class="modal-content">
+        <span class="close" (click)="closeAddModal()">&times;</span>
+        <h2>Add New Site</h2>
+        <form (ngSubmit)="saveSite()">
+          <div>
+            <label for="atmId">ATM ID:</label>
+            <input id="atmId" [(ngModel)]="newSite.ATM_ID" name="atmId" required>
+          </div>
+         
+          <button type="submit">Save</button>
+        </form>
       </div>
     </div>
 

@@ -7,16 +7,17 @@ import { SidedetailsComponent } from './sidedetails/sidedetails.component';
 import { LiveviewComponent } from './liveview/liveview.component';
 import { AdduserComponent } from './adduser/adduser.component';
 import { ReportsComponent } from './reports/reports.component';
-
+import { AuthGuard } from './auth.guard'; // Import your AuthGuard
 
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'sidedetails', component: SidedetailsComponent },
-  { path: 'liveview', component: LiveviewComponent },
-  { path: 'adduser', component: AdduserComponent },
-  { path: 'reports', component: ReportsComponent }
+  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'sidedetails', component: SidedetailsComponent, canActivate: [AuthGuard] },
+  { path: 'liveview', component: LiveviewComponent, canActivate: [AuthGuard] },
+  { path: 'adduser', component: AdduserComponent, canActivate: [AuthGuard] },
+  { path: 'reports', component: ReportsComponent, canActivate: [AuthGuard] },
+  { path: '**', redirectTo: '/login' } // Wildcard route for handling unknown routes
 ];
 
 @NgModule({

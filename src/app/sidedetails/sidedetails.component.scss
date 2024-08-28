@@ -1,4 +1,3 @@
-/* SiteDetailsComponent SCSS */
 .main-container {
     display: flex;
     flex-direction: column;
@@ -16,7 +15,6 @@
 .main {
     padding: 60px 20px 20px; // Adjust for header height
     flex: 1; // Allow main to grow and fill available space
-
     overflow-y: auto;
 }
 
@@ -148,6 +146,80 @@
     }
 }
 
+/* Button styles */
+.add-button-container {
+    text-align: right; /* Align the button to the right */
+    margin-top: 20px; /* Space above the button */
+}
+
+.add-button {
+    padding: 10px 20px; /* Adjust padding for button */
+    background-color: #007bff; /* Background color of the button */
+    color: #fff; /* Text color of the button */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+    font-weight: bold; /* Font weight */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+.add-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.add-button:focus {
+    outline: none; /* Remove default focus outline */
+}
+
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    margin: 20px 0; // Add space above and below the pagination
+  
+    button {
+      padding: 8px 16px; // Add padding to the buttons
+      margin: 0 5px; // Add space between buttons
+      border: none;
+      background-color: #007bff; // Button background color (blue)
+      color: #fff; // Button text color
+      font-size: 14px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  
+      &:hover {
+        background-color: #0056b3; // Darker blue on hover
+      }
+  
+      &:disabled {
+        background-color: #6c757d; // Gray color for disabled state
+        cursor: not-allowed; // Indicate that the button is not clickable
+      }
+    }
+  
+    span {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333; // Text color for the page number
+      margin: 0 10px; // Space between the buttons and the page number
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .pagination-controls {
+      flex-direction: column; // Stack the controls vertically on small screens
+      button {
+        margin-bottom: 10px; // Space between buttons and span when stacked
+        width: 100%; // Full width buttons on mobile
+      }
+      span {
+        margin-bottom: 10px; // Space below the page number
+      }
+    }
+  }
+
 /* Footer styles */
 .footer {
     padding: 10px;
@@ -213,53 +285,76 @@
         margin-left: 0; // Align footer with content on mobile screens
         width: 100%; // Full width on mobile screens
     }
-}
-
-.pagination-controls {
+}/* Modal styling */
+.modal {
     display: flex;
-     // Vertically align the controls
-    margin: 20px 0; // Add space above and below the pagination
-  
-    button {
-      padding: 8px 16px; // Add padding to the buttons
-      margin: 0 5px; // Add space between buttons
-      border: none;
-      background-color: #007bff; // Button background color (blue)
-      color: #fff; // Button text color
-      font-size: 14px;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-  
-      &:hover {
-        background-color: #0056b3; // Darker blue on hover
-      }
-  
-      &:disabled {
-        background-color: #6c757d; // Gray color for disabled state
-        cursor: not-allowed; // Indicate that the button is not clickable
-      }
-    }
-  
-    span {
-      font-size: 14px;
-      font-weight: bold;
-      color: #333; // Text color for the page number
-      margin: 0 10px; // Space between the buttons and the page number
-    }
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
   }
   
-  @media (max-width: 768px) {
-    .pagination-controls {
-      flex-direction: column; // Stack the controls vertically on small screens
-      button {
-        margin-bottom: 10px; // Space between buttons and span when stacked
-        width: 100%; // Full width buttons on mobile
-      }
-      span {
-        margin-bottom: 10px; // Space below the page number
-      }
-    }
+  .modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    position: relative;
+  }
+  
+  .modal-content h2 {
+    margin-top: 0;
+    font-size: 24px;
+  }
+  
+  .modal-content form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .modal-content label {
+    margin: 10px 0 5px;
+    font-size: 16px;
+  }
+  
+  .modal-content input {
+    padding: 8px;
+    margin-bottom: 20px; /* Increased margin to add space below the input field */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+  }
+  
+  .modal-content button {
+    align-self: flex-end;
+    padding: 10px 20px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .modal-content button:hover {
+    background: #0056b3;
+  }
+  
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #007bff;
+  }
+  
+  .close:hover {
+    color: #0056b3;
   }
   
