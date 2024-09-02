@@ -1,6 +1,6 @@
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; // Align items to the edges
   align-items: center;
   background-color: white;
   padding: 0 20px;
@@ -19,7 +19,7 @@
 .sidebar-toggle {
   display: flex;
   align-items: center;
-  margin-right: auto;
+  margin-right: auto; // Pushes this element to the left
 }
 
 .toggle-button {
@@ -31,7 +31,6 @@
 }
 
 .logo {
-  margin-right: 20px;
   display: flex;
   align-items: center; // Center logo vertically
 }

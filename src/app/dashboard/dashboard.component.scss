@@ -54,9 +54,6 @@
   margin-left: 210px; // Adjust based on sidebar width
   position: relative;
 
-  .heading {
-    padding: 20px;
-  }
 
   .row {
     display: flex;
@@ -65,11 +62,6 @@
     padding: 10px 0;
   }
 
-  .heading-title {
-    flex: 1;
-    text-align: left; // Align title to the left
-    margin-right: 20px; // Space between title and actions
-  }
 
   .add-button-container {
     margin-top: 15px; /* Add some space above the button */
@@ -342,3 +334,161 @@
     flex-direction: column;
   }
 }
+
+.modal {
+  display: none; // Hidden by default
+  background: rgba(0, 0, 0, 0.5); // Semi-transparent background
+  position: fixed; // Fixed positioning to cover the entire viewport
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; // Allow scrolling if needed
+  z-index: 1050; // Higher z-index to ensure modal appears on top
+
+  &.show {
+    display: block; // Show modal when active
+  }
+
+  .modal-dialog {
+    max-width: 500px; // Max width of the modal dialog
+    margin: 50px auto; // Center modal horizontally and vertically
+
+    @media (max-width: 576px) {
+      max-width: 90%; // Adjust width on smaller screens
+    }
+  }
+
+  .modal-content {
+    background: #fff; // White background for modal content
+    padding: 20px;
+    border-radius: 5px; // Rounded corners for modal
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); // Shadow effect
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between; // Space between title and close button
+      align-items: center;
+      border-bottom: 1px solid #dee2e6; // Border for header separation
+      padding-bottom: 15px; // Padding for spacing
+      position: relative;
+
+      .modal-title {
+        margin-right: auto; // Align title to the left
+        font-size: 1.25rem;
+        font-weight: 500;
+      }
+
+      .close {
+        position: absolute; // Position close button at the top right
+        top: 10px;
+        right: 10px;
+        font-size: 1.5rem; // Larger size for close icon
+        color: #000;
+        cursor: pointer;
+        background: transparent; // No background for close button
+        border: none; // No border for close button
+
+        &:hover {
+          color: #ff0000; // Red color on hover
+        }
+      }
+    }
+
+    .modal-body {
+      padding: 15px; // Padding inside modal body
+
+      .input-group {
+        display: flex; // Flex display for input group
+        align-items: center;
+
+        .form-control {
+          border-top-right-radius: 0; // No right border-radius
+          border-bottom-right-radius: 0; // No right border-radius
+        }
+
+        .input-group-append {
+          .btn {
+            border-top-left-radius: 0; // No left border-radius
+            border-bottom-left-radius: 0; // No left border-radius
+            background-color: transparent;
+            border: none;
+            font-size: 1.25rem; // Adjust font size
+            color: #000;
+            cursor: pointer;
+            padding: 0 10px; // Padding for the button
+            display: flex;
+            align-items: center;
+
+            &:hover {
+              color: #ff0000; // Red color on hover
+            }
+          }
+        }
+      }
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end; // Align footer buttons to the right
+      padding: 15px 20px; // Padding for footer
+      border-top: 1px solid #dee2e6; // Border for footer separation
+
+      .btn {
+        margin-left: 10px; // Space between buttons
+        &:first-child {
+          margin-left: 0; // Remove margin for the first button
+        }
+
+        &:hover {
+          opacity: 0.9; // Slight opacity change on hover
+        }
+      }
+
+      .btn-primary {
+        background-color: #007bff; // Primary button color
+        border-color: #007bff; // Border color for primary button
+
+        &:hover {
+          background-color: #0056b3; // Darker blue on hover
+          border-color: #004085; // Darker border on hover
+        }
+      }
+
+      .btn-secondary {
+        background-color: #6c757d; // Secondary button color
+        border-color: #6c757d; // Border color for secondary button
+
+        &:hover {
+          background-color: #5a6268; // Darker grey on hover
+          border-color: #545b62; // Darker border on hover
+        }
+      }
+    }
+  }
+}
+
+// Media Queries for responsiveness
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 10px; // Adjust padding for smaller screens
+  }
+
+  .modal-header {
+    padding-bottom: 10px; // Adjust padding for smaller screens
+
+    .modal-title {
+      font-size: 1rem; // Smaller font size on small screens
+    }
+
+    .close {
+      top: 5px; // Adjust position for smaller screens
+      right: 5px; // Adjust position for smaller screens
+    }
+  }
+
+  .modal-footer {
+    padding: 10px 15px; // Adjust padding for smaller screens
+  }
+}
+

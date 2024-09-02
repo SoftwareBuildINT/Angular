@@ -1,20 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // Add this import
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   showModal = false;
   lhoName = '';
-  
-  constructor(private router: Router, private http: HttpClient) {} // Add HttpClient
+  lhoList: { LHO_Name: string; atm_count: number | null }[] = []; // Updated to match API response
 
-  navigateToSiteDetails() {
-    this.router.navigate(['/sidedetails']);
+  constructor(private router: Router, private http: HttpClient) {}
+
+  ngOnInit() {
+    this.fetchLhoList(); // Fetch LHO data on component initialization
+  }
+
+  navigateToSiteDetails(lho: { LHO_Name: string; atm_count: number | null }) {
+    // Navigate to /sidedetails and optionally pass data via query params or state
+    this.router.navigate(['/sidedetails'], { queryParams: { lhoName: lho.LHO_Name } });
   }
 
   openModal() {
@@ -34,10 +40,11 @@ export class DashboardComponent {
       console.log('LHO Name:', this.lhoName);
       this.http.post('http://localhost:5000/LHO', { LHO_Name: this.lhoName })
         .subscribe({
-          next: (response: any) => { // Change response type to 'any'
+          next: (response: any) => {
             console.log('Response from server:', response);
-            alert(response.message || 'LHO saved successfully.'); // Show the message from API
+            alert(response.message || 'LHO saved successfully.');
             this.closeModal(); // Close the modal after saving
+            this.fetchLhoList(); // Refresh the LHO list after saving
           },
           error: (error) => {
             console.error('Error saving LHO:', error);
@@ -47,5 +54,19 @@ export class DashboardComponent {
     } else {
       alert('Please enter a valid LHO Name');
     }
+  }
+
+  fetchLhoList() {
+    this.http.get<{ count: number; lhoList: { LHO_Name: string; atm_count: number | null }[] }>('http://localhost:5000/LHO')
+      .subscribe({
+        next: (response) => {
+          console.log('LHO List:', response);
+          this.lhoList = response.lhoList; // Extract lhoList from the response
+        },
+        error: (error) => {
+          console.error('Error fetching LHO list:', error);
+          alert('An error occurred while fetching the LHO list.');
+        }
+      });
   }
 }

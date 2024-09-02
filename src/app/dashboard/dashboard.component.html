@@ -34,26 +34,22 @@
               </tr>
             </thead>
             <tbody>
-              <tr (click)="navigateToSiteDetails()">
-                <td>LHO 1</td>
-                <td>100</td>
-                <td>80</td>
-                <td>20</td>
-                <td>80%</td>
+              <tr *ngFor="let lho of lhoList" (click)="navigateToSiteDetails(lho)">
+                <td>{{ lho.LHO_Name }}</td>
+                <td>{{ lho.atm_count || 0 }}</td>
+                <td>Placeholder</td>
+                <td>Placeholder</td>
+                <td>Placeholder</td>
               </tr>
-              <tr (click)="navigateToSiteDetails()">
-                <td>LHO 2</td>
-                <td>120</td>
-                <td>110</td>
-                <td>10</td>
-                <td>91.67%</td>
+              <tr *ngIf="lhoList.length === 0">
+                <td colspan="5">No LHO records found</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
-    
+
     <div class="row">
       <div class="col text-right add-button-container">
         <button class="btn btn-success" (click)="openModal()">Add</button>
@@ -64,7 +60,6 @@
     </footer>
   </div>
 </div>
-
 
 <!-- Modal Structure -->
 <div class="modal" tabindex="-1" role="dialog" [ngClass]="{'show d-block': showModal}" (click)="closeModal()">
@@ -93,4 +88,3 @@
     </div>
   </div>
 </div>
-

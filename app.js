@@ -222,7 +222,7 @@ app.put('/add-atmid', (req, res) => {
       } else {
         res.status(200).json({ message: 'ATMID already exists in the list.' });
       }
-      
+
     } catch (error) {
       console.error('Unexpected error:', error.message);
       res.status(500).json({ error: 'Unexpected error occurred.' });
@@ -262,7 +262,36 @@ app.get('/get-atmid/:name', (req, res) => {
       existingATMID = [];
     }
 
-    res.status(200).json({ LHO_Name: name, ATMIDs: existingATMID });
+    res.status(200).json({ LHO_Name: name, count:existingATMID.length, ATMIDs: existingATMID});
+  });
+});
+
+
+app.get('/LHO', (req, res) => {
+  // Query to fetch all LHO_Name entries and the count of ATMIDs associated with each LHO_Name
+  const getAllLHOQuery = `
+    SELECT LHO_Name, 
+           JSON_LENGTH(ATMID) AS atm_count 
+    FROM SiteDetails;
+  `;
+
+  connection.query(getAllLHOQuery, (err, results) => {
+    if (err) {
+      console.error('Error fetching data from MySQL:', err);
+      return res.status(500).json({ message: 'Error retrieving data from the database.' });
+    }
+
+    // Prepare the response data
+    const lhoList = results.map(row => ({
+      LHO_Name: row.LHO_Name,
+      atm_count: row.atm_count
+    }));
+
+    // Return the list of LHO_Name with ATMID counts and the total count of LHO entries
+    return res.status(200).json({ 
+      count: lhoList.length,
+      lhoList: lhoList 
+    });
   });
 });
 

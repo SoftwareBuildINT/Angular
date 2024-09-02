@@ -1,53 +1,63 @@
 <div class="container">
-    <div class="header">
-        <app-header></app-header>
+  <!-- Header Section -->
+  <div class="header">
+    <app-header [heading]="'Live View'"></app-header>   
+  </div>
+  <!-- Main Content Container -->
+  <div class="main-container">
+    <!-- Sidebar Section -->
+    <div class="side-nav">
+      <app-sidebar></app-sidebar>
     </div>
 
-    <div class="main-container">
-        <div class="side-nav">
-            <app-sidebar></app-sidebar>
-        </div>
-        <div class="main">
-            <div class="heading">
-                <h2 class="heading-text">Live View</h2>
+    <!-- Main Content Area -->
+    <div class="main">
+      <!-- Row for the first set of camera views -->
+      <div class="live-view">
+        <div class="row">
+          <!-- Camera 1 -->
+          <div class="camera-view">
+            <div class="camera-label">Camera 1</div>
+            <div class="camera-frame">
+              <!-- Video element for Camera 1 -->
+              <video id="video1" width="300" height="240" autoplay muted></video>
             </div>
-            <div class="row">
-                <div class="camera-view">
-                    <div class="camera-label">Camera 1</div>
-                    <div class="camera-frame">
-                        <img src="assets\images\street.jpg" alt="Camera 1" class="camera-image">
-                    </div>
-                </div>
-                <div class="camera-view">
-                    <div class="camera-label">Camera 2</div>
-                    <div class="camera-frame">
-                        <img src="assets\images\street.jpg" alt="Camera 2" class="camera-image">
-                      
-                    </div>
-                </div>
+          </div>
+          <!-- Camera 2 -->
+          <div class="camera-view">
+            <div class="camera-label">Camera 2</div>
+            <div class="camera-frame">
+              <!-- Video element for Camera 2 -->
+              <video id="video2" width="300" height="240" autoplay muted></video>
             </div>
-            <div class="row">
-                <div class="camera-view">
-                    <div class="camera-label">Camera 3</div>
-                    <div class="camera-frame">
-                        <img src="assets\images\street.jpg" alt="Camera 3" class="camera-image">
-                     
-                    </div>
-                </div>
-                <div class="camera-view">
-                    <div class="camera-label">Camera 4</div>
-                    <div class="camera-frame">
-                        <img src="assets\images\street.jpg" alt="Camera 4" class="camera-image">
-                        
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
 
+        <!-- Row for the second set of camera views -->
+        <div class="row">
+          <!-- Camera 3 -->
+          <div class="camera-view">
+            <div class="camera-label">Camera 3</div>
+            <div class="camera-frame">
+              <!-- Video element for Camera 3 -->
+              <video id="video3" width="300" height="240" autoplay muted></video>
+            </div>
+          </div>
+          <!-- Camera 4 -->
+          <div class="camera-view">
+            <div class="camera-label">Camera 4</div>
+            <div class="camera-frame">
+              <!-- Video element for Camera 4 -->
+              <video id="video4" width="300" height="240" autoplay muted></video>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- Footer -->
-<footer class="footer">
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
     Powered by <span class="build">Build</span><span class="int">INT</span>
-</footer>
-
+  </footer>
 </div>

@@ -7,7 +7,7 @@ import { catchError, map } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class DataService {
-  private loginUrl = 'http://10.30.100.124:3328/login'; // Login API URL
+  private loginUrl = 'http://localhost:5000/login'; // Login API URL
   private siteListUrl = 'https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'; // Site list API URL
   private dashboardUrl = 'http://localhost:5000/dashboard'; // Dashboard API URL
 
