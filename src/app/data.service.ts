@@ -11,7 +11,7 @@ export class DataService {
   private siteListUrl = 'https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'; // Site list API URL
   private dashboardUrl = 'http://localhost:5000/dashboard'; // Dashboard API URL
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Method to log in and store the token
   login(payload: { EmailId: string; password: string }): Observable<any> {
@@ -43,6 +43,17 @@ export class DataService {
     );
   }
 
+  getLhoList(lhoId: string): Observable<any> {
+    const apiUrl = `http://localhost:5000/lho-list?lho_id=${lhoId}`;
+    return this.http.get(apiUrl, { responseType: 'json' });
+  }
+
+  // Method to add a new ATM
+  addATM(atmData: { atmId: string; lho_id: string }): Observable<any> {
+    const apiUrl = `http://localhost:5000/add-atm`;
+    return this.http.post(apiUrl, atmData, { responseType: 'json' });
+  }
+
   // Method to get dashboard data
   getDashboardData(): Observable<any> {
     const headers = this.getAuthHeaders();
@@ -62,7 +73,7 @@ export class DataService {
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    
+
     return headers;
   }
 

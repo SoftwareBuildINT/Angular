@@ -1,6 +1,6 @@
 <div class="container">
   <div class="header">
-    <app-header [heading]="'Side Details'"></app-header>   
+    <app-header [heading]="'Site Details'"></app-header>
   </div>
 
   <div class="main-container">
@@ -50,7 +50,7 @@
       <div class="row">
         <div class="site-list-header">
           <h3>Site List</h3>
-          <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm">
+          <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm" />
           <button class="add-button" (click)="openAddModal()">Add New Site</button>
         </div>
       </div>
@@ -97,17 +97,25 @@
         <form (ngSubmit)="saveSite()">
           <div>
             <label for="atmId">ATM ID:</label>
-            <input id="atmId" [(ngModel)]="newSite.ATM_ID" name="atmId" required>
+            <input id="atmId" [(ngModel)]="newSite.ATM_ID" name="atmId" required />
           </div>
-         
+          <!-- Display error message if it exists -->
+          <div *ngIf="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
           <button type="submit">Save</button>
         </form>
       </div>
     </div>
+    
 
     <!-- Footer -->
     <footer class="footer">
-      <p>Powered by <span class="build">Build</span><span class="int">INT</span></p>
+      <p>
+        Powered by
+        <span class="build">Build</span>
+        <span class="int">INT</span>
+      </p>
     </footer>
   </div>
 </div>

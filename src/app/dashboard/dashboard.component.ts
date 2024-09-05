@@ -10,17 +10,18 @@ import { HttpClient } from '@angular/common/http';
 export class DashboardComponent implements OnInit {
   showModal = false;
   lhoName = '';
-  lhoList: { LHO_Name: string; atm_count: number | null }[] = []; // Updated to match API response
+  lhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private router: Router, private http: HttpClient) { }
 
   ngOnInit() {
     this.fetchLhoList(); // Fetch LHO data on component initialization
   }
 
-  navigateToSiteDetails(lho: { LHO_Name: string; atm_count: number | null }) {
-    // Navigate to /sidedetails and optionally pass data via query params or state
-    this.router.navigate(['/sidedetails'], { queryParams: { lhoName: lho.LHO_Name } });
+  navigateToSiteDetails(lho: { LHO_Name: string; lho_id: number }) {
+    if (lho.lho_id !== null) {
+      this.router.navigate(['/sidedetails'], { queryParams: { lho_id: lho.lho_id } });
+    }
   }
 
   openModal() {
@@ -38,7 +39,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('http://localhost:5000/LHO', { LHO_Name: this.lhoName })
+      this.http.post('http://localhost:5000/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             console.log('Response from server:', response);
@@ -48,7 +49,11 @@ export class DashboardComponent implements OnInit {
           },
           error: (error) => {
             console.error('Error saving LHO:', error);
-            alert('An error occurred while saving the LHO.');
+            if (error.status === 409) {
+              alert('LHO Name already exists in the database.');
+            } else {
+              alert('An error occurred while saving the LHO.');
+            }
           }
         });
     } else {
@@ -57,11 +62,18 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchLhoList() {
-    this.http.get<{ count: number; lhoList: { LHO_Name: string; atm_count: number | null }[] }>('http://localhost:5000/LHO')
+    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('http://localhost:5000/lho-list')
       .subscribe({
         next: (response) => {
           console.log('LHO List:', response);
-          this.lhoList = response.lhoList; // Extract lhoList from the response
+          this.lhoList = response.map(lho => ({
+            LHO_Name: lho.lho_name,
+            lho_id: lho.lho_id,
+            total_locations: lho.total_locations,
+            onlineCount: lho.onlineCount,
+            offlineCount: lho.offlineCount,
+            percentage: parseFloat(lho.percentage.toFixed(2)) // Convert back to a number
+          }));
         },
         error: (error) => {
           console.error('Error fetching LHO list:', error);
@@ -69,4 +81,6 @@ export class DashboardComponent implements OnInit {
         }
       });
   }
+
+
 }

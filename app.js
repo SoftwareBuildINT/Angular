@@ -4,6 +4,7 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 const app = express();
 app.use(cors());
 
@@ -15,7 +16,7 @@ const connection = mysql.createPool({
   host: '3.7.158.221',
   user: 'admin_buildINT',
   password: 'buildINT@2023$',
-  database: 'H_surveillance',
+  database: 'H_surveillance'
 });
 // Function to hash the password
 const hashPassword = async (password) => {
@@ -32,21 +33,19 @@ app.post('/register', async (req, res) => {
 
   try {
     // Check if the user with the given EmailId already exists
-    connection.query(
-      'SELECT email_id FROM users WHERE email_id = ?',
-      [EmailId],
-      (err, results) => {
-        if (err) {
-          console.error('Database query error:', err);
-          return res.status(500).json({ error: 'Internal server error' });
-        }
+    connection.query('SELECT email_id FROM users WHERE email_id = ?', [EmailId], (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
 
-        if (results.length > 0) {
-          return res.status(409).json({ error: 'Email is already in use' });
-        }
+      if (results.length > 0) {
+        return res.status(409).json({ error: 'Email is already in use' });
+      }
 
-        // Proceed with registration if the email is not in use
-        hashPassword(password).then((hashedPassword) => {
+      // Proceed with registration if the email is not in use
+      hashPassword(password)
+        .then((hashedPassword) => {
           connection.query(
             'INSERT INTO users (email_id, password, first_name, last_name, contact, role_id) VALUES (?, ?, ?, ?, ?, ?)',
             [EmailId, hashedPassword, FirstName, LastName, contact, role_id],
@@ -58,18 +57,17 @@ app.post('/register', async (req, res) => {
               return res.status(201).json({ message: 'User registered successfully' });
             }
           );
-        }).catch((error) => {
+        })
+        .catch((error) => {
           console.error('Error during password hashing:', error);
           return res.status(500).json({ error: 'Internal server error' });
         });
-      }
-    );
+    });
   } catch (error) {
     console.error('Error during registration:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 // Login route
 app.post('/login', async (req, res) => {
@@ -81,54 +79,51 @@ app.post('/login', async (req, res) => {
 
   try {
     // Fetch user details from the database based on the provided email
-    connection.query(
-      'SELECT * FROM users WHERE email_id = ?',
-      [EmailId],
-      async (err, results) => {
-        if (err) {
-          console.error('Database query error:', err);
-          return res.status(500).json({ error: 'Internal server error' });
-        }
-
-        if (results.length === 0) {
-          console.log('User not found:', EmailId);
-          return res.status(401).json({ error: 'Invalid EmailId or password' });
-        }
-
-        const user = results[0];
-        console.log('Fetched user details:', user);
-
-        // Compare the provided password with the hashed password stored in the database
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-          console.log('Password mismatch for user:', EmailId);
-          return res.status(401).json({ error: 'Invalid EmailId or password' });
-        }
-
-        // User is authenticated; generate a JWT token
-        const token = jwt.sign(
-          {
-            FirstName: user.FirstName,
-            LastName: user.LastName,
-            EmailId: user.EmailId,
-            role: user.role,
-            Id: user.Id,
-          },
-          'your-secret-key', // Replace with your secret key or use environment variables
-          {
-            expiresIn: '1h', // Token expires in 1 hour
-          }
-        );
-
-        // Respond with the JWT token
-        return res.status(200).json({ token });
+    connection.query('SELECT * FROM users WHERE email_id = ?', [EmailId], async (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
       }
-    );
+
+      if (results.length === 0) {
+        console.log('User not found:', EmailId);
+        return res.status(401).json({ error: 'Invalid EmailId or password' });
+      }
+
+      const user = results[0];
+      console.log('Fetched user details:', user);
+
+      // Compare the provided password with the hashed password stored in the database
+      const passwordMatch = await bcrypt.compare(password, user.password);
+      if (!passwordMatch) {
+        console.log('Password mismatch for user:', EmailId);
+        return res.status(401).json({ error: 'Invalid EmailId or password' });
+      }
+
+      // User is authenticated; generate a JWT token
+      const token = jwt.sign(
+        {
+          FirstName: user.FirstName,
+          LastName: user.LastName,
+          EmailId: user.EmailId,
+          role: user.role,
+          Id: user.Id
+        },
+        'your-secret-key', // Replace with your secret key or use environment variables
+        {
+          expiresIn: '1h' // Token expires in 1 hour
+        }
+      );
+
+      // Respond with the JWT token
+      return res.status(200).json({ token });
+    });
   } catch (error) {
     console.error('Error during login:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 app.post('/LHO', (req, res) => {
   const { LHO_Name } = req.body;
 
@@ -162,7 +157,6 @@ app.post('/LHO', (req, res) => {
     });
   });
 });
-
 
 app.put('/add-atmid', (req, res) => {
   const { LHO_Name, atm_id } = req.body;
@@ -222,15 +216,12 @@ app.put('/add-atmid', (req, res) => {
       } else {
         res.status(200).json({ message: 'ATMID already exists in the list.' });
       }
-
     } catch (error) {
       console.error('Unexpected error:', error.message);
       res.status(500).json({ error: 'Unexpected error occurred.' });
     }
   });
 });
-
-
 
 // New endpoint to get ATMIDs for a given LHO_Name
 app.get('/get-atmid/:name', (req, res) => {
@@ -262,10 +253,9 @@ app.get('/get-atmid/:name', (req, res) => {
       existingATMID = [];
     }
 
-    res.status(200).json({ LHO_Name: name, count:existingATMID.length, ATMIDs: existingATMID});
+    res.status(200).json({ LHO_Name: name, count: existingATMID.length, ATMIDs: existingATMID });
   });
 });
-
 
 app.get('/LHO', (req, res) => {
   // Query to fetch all LHO_Name entries and the count of ATMIDs associated with each LHO_Name
@@ -282,16 +272,148 @@ app.get('/LHO', (req, res) => {
     }
 
     // Prepare the response data
-    const lhoList = results.map(row => ({
+    const lhoList = results.map((row) => ({
       LHO_Name: row.LHO_Name,
       atm_count: row.atm_count
     }));
 
     // Return the list of LHO_Name with ATMID counts and the total count of LHO entries
-    return res.status(200).json({ 
+    return res.status(200).json({
       count: lhoList.length,
-      lhoList: lhoList 
+      lhoList: lhoList
     });
+  });
+});
+
+app.get('/lho-list', async (req, res) => {
+  const lho_id = req.query.lho_id;
+
+  let query = ``;
+
+  if (lho_id) {
+    query = `
+    SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
+    GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
+    FROM H_surveillance.LHO_list l
+    JOIN atm_list a ON l.lho_id = a.lho_id
+    WHERE l.lho_id = ?
+    GROUP BY l.lho_id, l.lho_name;
+    `;
+  } else {
+    query = `
+    SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
+    GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
+    FROM H_surveillance.LHO_list l
+    LEFT JOIN atm_list a ON l.lho_id = a.lho_id
+    GROUP BY l.lho_id, l.lho_name;
+  `;
+  }
+
+  try {
+    // Fetch data from your database
+    connection.query(query, [lho_id], async (err, results) => {
+      if (err) {
+        console.error('Error fetching data from MySQL:', err);
+        return res.status(500).json({ message: 'Error retrieving data from the database.' });
+      }
+
+      // Convert the concatenated string into an array
+      results = results.map((row) => ({
+        ...row,
+        atm_ids: row.atm_ids ? row.atm_ids.split(',') : []
+      }));
+
+      // Fetch data from the external API
+      const apiResponse = await axios.get('https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll');
+
+      // Parse the text response into JSON
+      const siteDetails = JSON.parse(apiResponse.data);
+
+      // Merge the site status with your database results
+      const enrichedResults = results.map((lho) => {
+        // Initialize counters for online and offline ATMs
+        let onlineCount = 0;
+        let offlineCount = 0;
+
+        // Map ATM IDs to their corresponding site status
+        const atmData = lho.atm_ids.map((atm_id) => {
+          const siteDetail = siteDetails.find((site) => site.ATM_ID === atm_id);
+          const status = siteDetail ? siteDetail.SiteStatus : 'NO DATA';
+          const siteName = siteDetail ? siteDetail.unitname : 'NO DATA';
+          const city = siteDetail ? siteDetail.city : 'NO DATA';
+          const state = siteDetail ? siteDetail.state : 'NO DATA';
+
+          // Increment counters based on the status
+          if (status === 'ONLINE') {
+            onlineCount += 1;
+          } else if (status === 'OFFLINE') {
+            offlineCount += 1;
+          }
+
+          return {
+            atm_id,
+            siteName,
+            city,
+            state,
+            status
+          };
+        });
+
+        // Calculate the percentage of online ATMs
+        const totalATMs = onlineCount + offlineCount;
+        const percentage = totalATMs > 0 ? ((onlineCount / totalATMs) * 100).toFixed(2) : '0.00';
+
+        return {
+          ...lho,
+          onlineCount,
+          offlineCount,
+          percentage: parseFloat(percentage),
+          atm_data: atmData
+        };
+      });
+
+      return res.status(200).json(enrichedResults);
+    });
+  } catch (error) {
+    console.error('Error fetching data from the external API:', error);
+    return res.status(500).json({ message: 'Error retrieving data from the external API.' });
+  }
+});
+
+app.post('/add-lho', (req, res) => {
+  const { lho_name } = req.body;
+  const query = `INSERT INTO H_surveillance.LHO_list (lho_name) values (?);`;
+
+  connection.query(query, [lho_name], (err, results) => {
+    if (err) {
+      console.error('Error inserting data into MySQL:', err);
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ message: 'LHO Name already exists in the database.' });
+      }
+      return res.status(500).json({ message: 'Error inserting data into the database.' });
+    }
+    return res.status(201).json({ message: 'LHO added successfully', lho_id: results.insertId });
+  });
+});
+
+app.post('/add-atm', (req, res) => {
+  const query = `
+    INSERT INTO H_surveillance.atm_list (atm_id, lho_id) values (?, ?)
+    `;
+
+    const subAtm = ``
+
+  const { atmId, lho_id } = req.body;
+
+  connection.query(query, [atmId, lho_id], (error, result) => {
+    if (error) {
+      console.error('Error inserting data into MySQL:', error);
+      if (error.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ message: 'ATM ID already exists in different LHO.' });
+      }
+      return res.status(500).json({ message: 'Error inserting data into the database.' });
+    }
+    return res.status(201).json({ message: 'ATM added successfully' });
   });
 });
 

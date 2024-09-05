@@ -1,352 +1,355 @@
 .main-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh; // Ensure full viewport height
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; // Ensure full viewport height
+}
+
+.error-message {
+  color: red;
+  margin-top: 10px;
 }
 
 .container {
-    --bs-gutter-x: 1.5rem;
-    --bs-gutter-y: 0;
-    width: calc(100% - 210px); // Adjust width considering the sidebar
-    padding: 0 calc(var(--bs-gutter-x) * 0.5);
-    margin-left: 210px; // Align with sidebar width
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+  width: calc(100% - 210px); // Adjust width considering the sidebar
+  padding: 0 calc(var(--bs-gutter-x) * 0.5);
+  margin-left: 210px; // Align with sidebar width
 }
 
 .main {
-    padding: 60px 20px 20px; // Adjust for header height
-    flex: 1; // Allow main to grow and fill available space
-    overflow-y: auto;
+  padding: 60px 20px 20px; // Adjust for header height
+  flex: 1; // Allow main to grow and fill available space
+  overflow-y: auto;
 }
 
-
 .row {
+  display: flex;
+  gap: 20px; // Space between cards
+  flex-wrap: wrap; // Allow wrapping on smaller screens
+
+  .card {
+    background: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    flex: 1 1 calc(33.333% - 20px); // Responsive width for three cards in a row
+    max-width: calc(33.333% - 20px); // Ensure card does not exceed width
+
+    .card-body {
+      padding: 15px;
+      text-align: left;
+
+      .card-content {
+        .card-info {
+          display: flex;
+          justify-content: space-between; // Align count to the left and icon to the right
+          align-items: center; // Vertically center the items
+          gap: 10px; // Space between count and icon
+          margin-top: 10px;
+
+          .card-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: black; // Adjust color to match theme
+            text-align: left; // Align text to the left
+          }
+
+          i {
+            font-size: 26px; // Adjust icon size
+          }
+
+          .total-icon {
+            color: #243f90; // Blue color for total locations
+          }
+
+          .online-icon {
+            color: #28a745; // Green color for online locations
+          }
+
+          .offline-icon {
+            color: #dc3545; // Red color for offline locations
+          }
+        }
+      }
+    }
+  }
+
+  .site-list-header {
     display: flex;
-    gap: 20px; // Space between cards
-    flex-wrap: wrap; // Allow wrapping on smaller screens
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 2rem;
 
-    .card {
-        background: #ffffff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden;
-        flex: 1 1 calc(33.333% - 20px); // Responsive width for three cards in a row
-        max-width: calc(33.333% - 20px); // Ensure card does not exceed width
-
-        .card-body {
-            padding: 15px;
-            text-align: left;
-
-            .card-content {
-                .card-info {
-                    display: flex;
-                    justify-content: space-between; // Align count to the left and icon to the right
-                    align-items: center; // Vertically center the items
-                    gap: 10px; // Space between count and icon
-                    margin-top: 10px;
-
-                    .card-count {
-                        font-size: 24px;
-                        font-weight: bold;
-                        color: black; // Adjust color to match theme
-                        text-align: left; // Align text to the left
-                    }
-
-                    i {
-                        font-size: 26px; // Adjust icon size
-                    }
-
-                    .total-icon {
-                        color: #243f90; // Blue color for total locations
-                    }
-
-                    .online-icon {
-                        color: #28a745; // Green color for online locations
-                    }
-
-                    .offline-icon {
-                        color: #dc3545; // Red color for offline locations
-                    }
-                }
-            }
-        }
+    h3 {
+      margin: 0;
+      font-size: 1.5rem;
     }
 
-    .site-list-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        margin-top: 2rem;
-
-        h3 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-
-        .search-bar {
-            padding: 0.5rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 200px; // Adjust width as needed
-            height: 30px;
-        }
+    .search-bar {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 200px; // Adjust width as needed
+      height: 30px;
     }
+  }
 
-    .card1 {
-        background: #ffffff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        border-radius: 8px;
-        overflow: hidden;
-        width: 100%;
-        padding: 10px;
-        margin-top: 20px;
+  .card1 {
+    background: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    padding: 10px;
+    margin-top: 20px;
 
-        .site-list-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+    .site-list-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
 
-            thead {
-                background-color: #f4f4f4;
+      thead {
+        background-color: #f4f4f4;
 
-                th {
-                    padding: 10px;
-                    color: #000;
-                    font-weight: bold;
-                    text-align: center;
-                }
-            }
-
-            tbody {
-                tr {
-                    &:nth-child(even) {
-                        background-color: #f9f9f9;
-                    }
-
-                    &:hover {
-                        background-color:rgba(5, 117, 230, 0.35);
-                    }
-                }
-
-                td {
-                    padding: 12px;
-                    text-align: center;
-                    color: #000;
-                }
-            }
+        th {
+          padding: 10px;
+          color: #000;
+          font-weight: bold;
+          text-align: center;
         }
+      }
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background-color: #f9f9f9;
+          }
+
+          &:hover {
+            background-color: rgba(5, 117, 230, 0.35);
+          }
+        }
+
+        td {
+          padding: 12px;
+          text-align: center;
+          color: #000;
+        }
+      }
     }
+  }
 }
 
 /* Button styles */
 .add-button-container {
-    text-align: right; /* Align the button to the right */
-    margin-top: 20px; /* Space above the button */
+  text-align: right; /* Align the button to the right */
+  margin-top: 20px; /* Space above the button */
 }
 
 .add-button {
-    padding: 10px 20px; /* Adjust padding for button */
-    background-color: #007bff; /* Background color of the button */
-    color: #fff; /* Text color of the button */
-    border: none; /* Remove default border */
-    border-radius: 4px; /* Rounded corners */
-    font-size: 16px; /* Font size */
-    font-weight: bold; /* Font weight */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s ease; /* Smooth background color transition */
+  padding: 10px 20px; /* Adjust padding for button */
+  background-color: #007bff; /* Background color of the button */
+  color: #fff; /* Text color of the button */
+  border: none; /* Remove default border */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 16px; /* Font size */
+  font-weight: bold; /* Font weight */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
 }
 
 .add-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+  background-color: #0056b3; /* Darker blue on hover */
 }
 
 .add-button:focus {
-    outline: none; /* Remove default focus outline */
+  outline: none; /* Remove default focus outline */
 }
 
 /* Pagination Controls */
 .pagination-controls {
-    display: flex;
-    margin: 20px 0; // Add space above and below the pagination
-  
+  display: flex;
+  margin: 20px 0; // Add space above and below the pagination
+
+  button {
+    padding: 8px 16px; // Add padding to the buttons
+    margin: 0 5px; // Add space between buttons
+    border: none;
+    background-color: #007bff; // Button background color (blue)
+    color: #fff; // Button text color
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #0056b3; // Darker blue on hover
+    }
+
+    &:disabled {
+      background-color: #6c757d; // Gray color for disabled state
+      cursor: not-allowed; // Indicate that the button is not clickable
+    }
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333; // Text color for the page number
+    margin: 0 10px; // Space between the buttons and the page number
+  }
+}
+
+@media (max-width: 768px) {
+  .pagination-controls {
+    flex-direction: column; // Stack the controls vertically on small screens
     button {
-      padding: 8px 16px; // Add padding to the buttons
-      margin: 0 5px; // Add space between buttons
-      border: none;
-      background-color: #007bff; // Button background color (blue)
-      color: #fff; // Button text color
-      font-size: 14px;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-  
-      &:hover {
-        background-color: #0056b3; // Darker blue on hover
-      }
-  
-      &:disabled {
-        background-color: #6c757d; // Gray color for disabled state
-        cursor: not-allowed; // Indicate that the button is not clickable
-      }
+      margin-bottom: 10px; // Space between buttons and span when stacked
+      width: 100%; // Full width buttons on mobile
     }
-  
     span {
-      font-size: 14px;
-      font-weight: bold;
-      color: #333; // Text color for the page number
-      margin: 0 10px; // Space between the buttons and the page number
+      margin-bottom: 10px; // Space below the page number
     }
   }
-  
-  @media (max-width: 768px) {
-    .pagination-controls {
-      flex-direction: column; // Stack the controls vertically on small screens
-      button {
-        margin-bottom: 10px; // Space between buttons and span when stacked
-        width: 100%; // Full width buttons on mobile
-      }
-      span {
-        margin-bottom: 10px; // Space below the page number
-      }
-    }
-  }
+}
 
 /* Footer styles */
 .footer {
-    padding: 10px;
-    text-align: center;
-    margin-left: 110px; // Align with sidebar width
+  padding: 10px;
+  text-align: center;
+  margin-left: 110px; // Align with sidebar width
 
-    position: relative; // Position relative within the main-container
-    width: calc(100% - 210px); // Full width minus sidebar width
-    font-size: 16px;
-    font-weight: normal;
+  position: relative; // Position relative within the main-container
+  width: calc(100% - 210px); // Full width minus sidebar width
+  font-size: 16px;
+  font-weight: normal;
 
-    p {
-        margin: 0;
-    }
+  p {
+    margin: 0;
+  }
 
-    .build {
-        font-weight: bold;
-        color: #000; // Black color for Build
-    }
+  .build {
+    font-weight: bold;
+    color: #000; // Black color for Build
+  }
 
-    .int {
-        font-weight: bold;
-        color: #28a745; // Green color for INT
-    }
+  .int {
+    font-weight: bold;
+    color: #28a745; // Green color for INT
+  }
 }
 
 /* Adjustments when sidebar is collapsed */
 #sidebar.active + .main {
-    margin-left: 70px; // Adjust for the collapsed sidebar
+  margin-left: 70px; // Adjust for the collapsed sidebar
 }
 
 @media (max-width: 992px) {
-    .container {
-        width: 100%; // Full width on smaller screens
-        margin-left: 0; // No margin on smaller screens
-    }
+  .container {
+    width: 100%; // Full width on smaller screens
+    margin-left: 0; // No margin on smaller screens
+  }
 
-    .main {
-        padding: 100px 10px 20px; // Adjust for smaller screens
-    }
+  .main {
+    padding: 100px 10px 20px; // Adjust for smaller screens
+  }
 
-    .row {
-        .card {
-            flex: 1 1 calc(50% - 10px); // Two cards per row on medium screens
-            max-width: calc(50% - 10px);
-        }
+  .row {
+    .card {
+      flex: 1 1 calc(50% - 10px); // Two cards per row on medium screens
+      max-width: calc(50% - 10px);
     }
+  }
 }
 
 @media (max-width: 768px) {
-    .main {
-        padding: 120px 10px 20px; // Further adjustment for mobile screens
-    }
+  .main {
+    padding: 120px 10px 20px; // Further adjustment for mobile screens
+  }
 
-    .row {
-        .card {
-            flex: 1 1 100%; // Full width for cards on mobile screens
-            max-width: 100%;
-        }
+  .row {
+    .card {
+      flex: 1 1 100%; // Full width for cards on mobile screens
+      max-width: 100%;
     }
+  }
 
-    .footer {
-        margin-left: 0; // Align footer with content on mobile screens
-        width: 100%; // Full width on mobile screens
-    }
-}/* Modal styling */
+  .footer {
+    margin-left: 0; // Align footer with content on mobile screens
+    width: 100%; // Full width on mobile screens
+  }
+} /* Modal styling */
 .modal {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    max-width: 90%;
-    position: relative;
-  }
-  
-  .modal-content h2 {
-    margin-top: 0;
-    font-size: 24px;
-  }
-  
-  .modal-content form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .modal-content label {
-    margin: 10px 0 5px;
-    font-size: 16px;
-  }
-  
-  .modal-content input {
-    padding: 8px;
-    margin-bottom: 20px; /* Increased margin to add space below the input field */
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-  }
-  
-  .modal-content button {
-    align-self: flex-end;
-    padding: 10px 20px;
-    border: none;
-    background: #007bff;
-    color: #fff;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-  }
-  
-  .modal-content button:hover {
-    background: #0056b3;
-  }
-  
-  .close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #007bff;
-  }
-  
-  .close:hover {
-    color: #0056b3;
-  }
-  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  font-size: 24px;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content label {
+  margin: 10px 0 5px;
+  font-size: 16px;
+}
+
+.modal-content input {
+  padding: 8px;
+  margin-bottom: 20px; /* Increased margin to add space below the input field */
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+}
+
+.modal-content button {
+  align-self: flex-end;
+  padding: 10px 20px;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-content button:hover {
+  background: #0056b3;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #007bff;
+}
+
+.close:hover {
+  color: #0056b3;
+}
