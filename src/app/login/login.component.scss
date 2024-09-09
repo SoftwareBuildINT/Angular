@@ -16,6 +16,12 @@
   justify-content: center;
   padding: 20px;
 }
+.error-message {
+  color: red;
+  margin-top: 5px;
+  font-size: 0.875rem; /* Adjust size as needed */
+}
+
 
 .login-left {
   background: linear-gradient(135deg, 
@@ -79,12 +85,12 @@
 }
 
 .form-control {
-  width: 100%;
+  width: 130%;
   height: 50%; 
 }
 
 .btn {
-  width: 100%;
+  width: 130%;
   height: 35px; 
   display: flex;
   align-items: center;

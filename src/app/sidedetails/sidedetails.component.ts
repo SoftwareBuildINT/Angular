@@ -93,6 +93,37 @@ export class SidedetailsComponent implements OnInit {
     return this.paginatedSites(filtered);
   }
 
+  downloadSiteList(): void {
+    // Get the filtered data to ensure the download includes only the filtered results
+    const filteredData = this.filteredSites();
+    const csvContent = this.convertToCSV(filteredData);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'site_list.csv');
+    link.click();
+  }
+  
+  
+  convertToCSV(data: Site[]): string {
+    const header = ['ATM ID', 'Site Name', 'City', 'State', 'Site Status'];
+    const rows = data.map(site => [
+      site.ATM_ID,
+      site.unitname,
+      site.city,
+      site.state,
+      site.SiteStatus || ''
+    ]);
+    
+    return [
+      header.join(','), // header row
+      ...rows.map(row => row.join(',')) // data rows
+    ].join('\n');
+  }
+  
+  
+
   paginatedSites(sites: Site[] = this.siteList): Site[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;

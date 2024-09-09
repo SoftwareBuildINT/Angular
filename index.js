@@ -16,26 +16,26 @@ if (!fs.existsSync(streamDir)) {
 const cameras = [
   {
     id: 'camera1',
-    rtspUrl: 'rtsp://admin:Buildint%402023@172.14.1.96:81/cam/realmonitor?channel=1&subtype=1'
+    rtspUrl: 'rtsp://admin:Buildint%402024@172.14.2.106:81/cam/realmonitor?channel=1&subtype=1'
     // rtspUrl: 'rtsp://hitachi:hitachi12345@172.16.35.211:81/cam/realmonitor?channel=1&subtype=1'
     // rtspUrl: 'rtsp://hitachi:hitachi12345@172.16.35.211/MPEG4/ch1/main/av_stream'
   },
   {
     id: 'camera2',
-    rtspUrl: 'rtsp://admin:Buildint%402023@172.14.1.96:81/cam/realmonitor?channel=2&subtype=1'
+    rtspUrl: 'rtsp://admin:Buildint%402024@172.14.2.106:81/cam/realmonitor?channel=2&subtype=1'
   },
   {
     id: 'camera3',
-    rtspUrl: 'rtsp://admin:Buildint%402023@172.14.1.96:81/cam/realmonitor?channel=3&subtype=1'
+    rtspUrl: 'rtsp://admin:Buildint%402024@172.14.2.106:81/cam/realmonitor?channel=3&subtype=1'
   },
   {
     id: 'camera4',
-    rtspUrl: 'rtsp://admin:Buildint%402023@172.14.1.96:81/cam/realmonitor?channel=4&subtype=1'
+    rtspUrl: 'rtsp://admin:Buildint%402024@172.14.2.106:81/cam/realmonitor?channel=4&subtype=1'
   },
-  {
-    id: 'camera5',
-    rtspUrl: 'rtsp://admin:Buildint%402023@172.14.1.96:81/cam/realmonitor?channel=5&subtype=1'
-  }
+  // {
+  //   id: 'camera5',
+  //   rtspUrl: 'rtsp://admin:Buildint%402024@172.14.2.106:81/cam/realmonitor?channel=5&subtype=1'
+  // }
 ];
 
 // Convert RTSP to HLS using FFmpeg
@@ -56,7 +56,7 @@ function startStream(camera) {
     '-f',
     'hls',
     '-hls_time',
-    '5',
+    '30',
     '-hls_list_size',
     '1',
     '-hls_flags',

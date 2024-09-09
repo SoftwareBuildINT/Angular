@@ -10,7 +10,9 @@ import { HttpClient } from '@angular/common/http';
 export class DashboardComponent implements OnInit {
   showModal = false;
   lhoName = '';
+  searchTerm: string = ''; // Holds the search input
   lhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
+  filteredLhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
 
   constructor(private router: Router, private http: HttpClient) { }
 
@@ -74,6 +76,7 @@ export class DashboardComponent implements OnInit {
             offlineCount: lho.offlineCount,
             percentage: parseFloat(lho.percentage.toFixed(2)) // Convert back to a number
           }));
+          this.filteredLhoList = [...this.lhoList]; // Initialize the filtered list
         },
         error: (error) => {
           console.error('Error fetching LHO list:', error);
@@ -82,5 +85,10 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-
+  // Method to filter the LHO list based on search input
+  filterLhoList() {
+    this.filteredLhoList = this.lhoList.filter(lho =>
+      lho.LHO_Name.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
 }

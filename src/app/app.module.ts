@@ -12,6 +12,7 @@ import { SidedetailsComponent } from './sidedetails/sidedetails.component';
 import { LiveviewComponent } from './liveview/liveview.component';
 import { AdduserComponent } from './adduser/adduser.component'; 
 import { ReportsComponent } from './reports/reports.component'; 
+import { UsermanagementComponent } from './usermanagement/usermanagement.component';
  
 
 
@@ -25,7 +26,8 @@ import { ReportsComponent } from './reports/reports.component';
     SidedetailsComponent,
     LiveviewComponent,
     AdduserComponent,
-    ReportsComponent 
+    ReportsComponent,
+    UsermanagementComponent 
    
   ],
   imports: [

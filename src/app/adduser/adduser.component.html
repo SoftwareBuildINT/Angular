@@ -1,68 +1,56 @@
 <div class="container">
-    <div class="header">
-      <app-header></app-header>
-    </div>
-  
-    <div class="main-container">
-      <div class="side-nav">
-        <app-sidebar></app-sidebar>
-      </div>
-      <div class="main">
-        <div class="heading">
-          <h3 class="heading-text">Add User</h3>
-        </div>
-        <div class="card-body">
-          <form class="user-form" (ngSubmit)="onSubmit()" #userForm="ngForm">
-            <div class="row">
-              <div class="form-group">
-                <label for="firstName">First Name</label>
-                <input type="text" id="firstName" name="firstName" placeholder="First Name" required>
-              </div>
-              <div class="form-group">
-                <label for="lastName">Last Name</label>
-                <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
-              </div>
-            </div>
-            <div class="row">
-              <div class="form-group">
-                <label for="email">Email ID</label>
-                <input type="email" id="email" name="email" placeholder="Email ID" required>
-              </div>
-              <div class="form-group">
-                <label for="phoneNumber">Phone Number</label>
-                <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required
-                       (keypress)="validatePhoneNumber($event)"
-                       (input)="formatPhoneNumber($event)"
-                       maxlength="10">
-              </div>
-            </div>
-            <div class="row">
-              <div class="form-group">
-                <label for="role">Role</label>
-                <input type="text" id="role" name="role" placeholder="Role" required>
-              </div>
-              <div class="form-group">
-                <label for="organization">Organization</label>
-                <input type="text" id="organization" name="organization" placeholder="Organization" required>
-              </div>
-            </div>
-            <div class="row">
-              <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Password" required>
-              </div>
-              <div class="form-group">
-              </div>
-            </div>
-            <button type="submit" class="submit-btn">Submit</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  
-    <!-- Footer -->
-    <footer class="footer">
-      Powered by <span class="build">Build</span><span class="int">INT</span>
-    </footer>
+  <div class="header">
+    <app-header [heading]="' Add User'"></app-header>
   </div>
-  
+
+  <div class="main-container">
+    <div class="side-nav">
+      <app-sidebar></app-sidebar>
+    </div>
+    <div class="main">
+      <div class="card-body">
+        <form class="user-form" (ngSubmit)="onSubmit(userForm)" #userForm="ngForm">
+          <div class="row">
+            <div class="form-group">
+              <label for="firstName">First Name</label>
+              <input type="text" id="firstName" name="firstName" [(ngModel)]="user.firstName" placeholder="First Name" required>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name</label>
+              <input type="text" id="lastName" name="lastName" [(ngModel)]="user.lastName" placeholder="Last Name" required>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="email">Email ID</label>
+              <input type="email" id="email" name="email" [(ngModel)]="user.email" placeholder="Email ID" required>
+            </div>
+            <div class="form-group">
+              <label for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" name="phoneNumber" [(ngModel)]="user.phoneNumber" placeholder="Phone Number" required
+                     (keypress)="validatePhoneNumber($event)"
+                     (input)="formatPhoneNumber($event)"
+                     maxlength="10">
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="role">Role</label>
+              <input type="text" id="role" name="role" [(ngModel)]="user.role" placeholder="Role" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" [(ngModel)]="user.password" placeholder="Password" required>
+            </div>
+          </div>
+          <button type="submit" class="submit-btn">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Powered by <span class="build">Build</span><span class="int">INT</span>
+  </footer>
+</div>
