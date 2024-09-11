@@ -1,7 +1,7 @@
 <!-- Dashboard HTML Structure -->
 <div class="container">
   <div class="header">
-    <app-header></app-header>
+    <app-header [heading]="'Dashboard'"></app-header>
   </div>
 </div>
 
@@ -10,16 +10,19 @@
     <app-sidebar></app-sidebar>
   </div>
   <div class="main">
-    <div class="heading">
-      <h3>Dashboard</h3>
-    </div>
     <div class="row align-items-center">
       <div class="col heading-title">
         <h4>LHO Wise List</h4>
       </div>
       <div class="col heading-actions text-right">
-        <button class="btn btn-primary">Download</button>
-        <input type="text" class="form-control search-bar d-inline-block" placeholder="Search" />
+        <!-- <button class="btn btn-dark">Download</button> -->
+        <input
+          type="text"
+          class="form-control search-bar d-inline-block"
+          placeholder="Search LHO"
+          [(ngModel)]="searchTerm"
+          (input)="filterLhoList()"
+        />
       </div>
     </div>
     <div class="row">
@@ -36,14 +39,14 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let lho of lhoList" (click)="navigateToSiteDetails(lho)">
+              <tr *ngFor="let lho of filteredLhoList" (click)="navigateToSiteDetails(lho)">
                 <td>{{ lho.LHO_Name }}</td>
                 <td>{{ lho.total_locations }}</td>
                 <td>{{ lho.onlineCount }}</td>
                 <td>{{ lho.offlineCount }}</td>
                 <td>{{ lho.percentage }}%</td>
               </tr>
-              <tr *ngIf="lhoList.length === 0">
+              <tr *ngIf="filteredLhoList.length === 0">
                 <td colspan="5">No LHO records found</td>
               </tr>
             </tbody>
@@ -59,9 +62,7 @@
     </div>
 
     <footer class="footer">
-      Powered by
-      <span class="build">Build</span>
-      <span class="int">INT</span>
+      Powered by <span class="build">Build</span> <span class="int">INT</span>
     </footer>
   </div>
 </div>
@@ -95,8 +96,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
-        <button type="button" class="btn btn-primary" (click)="saveLho()">Save changes</button>
+        <button type="button" class="btn btn-danger" (click)="closeModal()">Close</button>
+        <button type="button" class="btn btn-primary" (click)="saveLho()">Add LHO</button>
       </div>
     </div>
   </div>

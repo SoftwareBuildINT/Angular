@@ -51,7 +51,9 @@
         <div class="site-list-header">
           <h3>Site List</h3>
           <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm" />
-          <button class="add-button" (click)="openAddModal()">Add New Site</button>
+          <button class="download-button" (click)="downloadSiteList()">Download</button>
+
+          <button class="add-button-dark" (click)="openAddModal()">Add New Site</button>
         </div>
       </div>
 

@@ -25,15 +25,16 @@ const hashPassword = async (password) => {
 };
 
 app.post('/register', async (req, res) => {
-  const { EmailId, password, FirstName, LastName, contact, role_id } = req.body;
+  const { email_id, password, first_name, last_name, contact, role_id } = req.body;
 
-  if (!EmailId || !password || !FirstName || !LastName || !contact || !role_id) {
+  if (!email_id || !password || !first_name || !last_name || !contact || !role_id) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
+
   try {
     // Check if the user with the given EmailId already exists
-    connection.query('SELECT email_id FROM users WHERE email_id = ?', [EmailId], (err, results) => {
+    connection.query('SELECT email_id FROM users WHERE email_id = ?', [email_id], (err, results) => {
       if (err) {
         console.error('Database query error:', err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -45,30 +46,33 @@ app.post('/register', async (req, res) => {
 
       // Proceed with registration if the email is not in use
       hashPassword(password)
-        .then((hashedPassword) => {
-          connection.query(
-            'INSERT INTO users (email_id, password, first_name, last_name, contact, role_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [EmailId, hashedPassword, FirstName, LastName, contact, role_id],
-            (err, results) => {
-              if (err) {
-                console.error('Database query error:', err);
-                return res.status(500).json({ error: 'Internal server error' });
-              }
-              return res.status(201).json({ message: 'User registered successfully' });
+      .then((hashedPassword) => {
+        connection.query(
+          'INSERT INTO users (email_id, password, first_name, last_name, contact, role_id) VALUES (?, ?, ?, ?, ?, ?)',
+          [email_id, hashedPassword, first_name, last_name, contact, role_id],
+          (err, results) => {
+            if (err) {
+              console.error('Database query error:', err);
+              return res.status(500).json({ error: 'Internal server error' });
             }
-          );
-        })
-        .catch((error) => {
-          console.error('Error during password hashing:', error);
-          return res.status(500).json({ error: 'Internal server error' });
-        });
-    });
-  } catch (error) {
-    console.error('Error during registration:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+            return res.status(201).json({ message: 'User registered successfully' });
+          }
+        );
+      })
+      .catch((error) => {
+        console.error('Error during password hashing:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      });
+  });
+} catch (error) {
+  console.error('Error during registration:', error);
+  return res.status(500).json({ error: 'Internal server error' });
+}
 });
 
+app.listen(5000, () => {
+console.log('Server running on port 5000');
+});
 // Login route
 app.post('/login', async (req, res) => {
   const { EmailId, password } = req.body;
@@ -434,7 +438,7 @@ app.post('/add-atm', (req, res) => {
   });
 });
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5002;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
