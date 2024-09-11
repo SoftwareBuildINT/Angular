@@ -27,6 +27,7 @@ export class SidedetailsComponent implements OnInit {
   itemsPerPage: number = 10;
 
   showModal: boolean = false;
+  showSuccessModal: boolean = false;
   newSite: Site = {
     ATM_ID: '',
     unitname: '',
@@ -94,7 +95,6 @@ export class SidedetailsComponent implements OnInit {
   }
 
   downloadSiteList(): void {
-    // Get the filtered data to ensure the download includes only the filtered results
     const filteredData = this.filteredSites();
     const csvContent = this.convertToCSV(filteredData);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -104,8 +104,7 @@ export class SidedetailsComponent implements OnInit {
     link.setAttribute('download', 'site_list.csv');
     link.click();
   }
-  
-  
+
   convertToCSV(data: Site[]): string {
     const header = ['ATM ID', 'Site Name', 'City', 'State', 'Site Status'];
     const rows = data.map(site => [
@@ -121,8 +120,6 @@ export class SidedetailsComponent implements OnInit {
       ...rows.map(row => row.join(',')) // data rows
     ].join('\n');
   }
-  
-  
 
   paginatedSites(sites: Site[] = this.siteList): Site[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -149,16 +146,24 @@ export class SidedetailsComponent implements OnInit {
   openAddModal(): void {
     this.showModal = true;
   }
-
+    
   closeAddModal(): void {
     this.showModal = false;
   }
 
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+  }
+
   saveSite(): void {
-    const lhoId = this.route.snapshot.queryParams['lho_id']; 
+    if (!this.newSite.ATM_ID) {
+      this.errorMessage = 'ATM ID is required';
+      return;
+    }
+
     const atmData = {
       atmId: this.newSite.ATM_ID,
-      lho_id: lhoId,
+      lho_id: this.lhoId,
     };
 
     console.log('New Site Data:', atmData);
@@ -169,6 +174,7 @@ export class SidedetailsComponent implements OnInit {
         this.fetchSiteList(); 
         this.closeAddModal();
         this.errorMessage = null; // Clear any previous error message
+        this.showSuccessModal = true; // Show success modal
       },
       (error) => {
         if (error.status === 409) {
