@@ -292,80 +292,92 @@ app.get('/LHO', (req, res) => {
 app.get('/lho-list', async (req, res) => {
   const lho_id = req.query.lho_id;
 
-  let query = ``;
-
-  if (lho_id) {
-    query = `
+  const query = lho_id
+    ? `
     SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
     GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
     FROM H_surveillance.LHO_list l
     JOIN atm_list a ON l.lho_id = a.lho_id
     WHERE l.lho_id = ?
-    GROUP BY l.lho_id, l.lho_name;
-    `;
-  } else {
-    query = `
+    GROUP BY l.lho_id, l.lho_name;`
+    : `
     SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
     GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
     FROM H_surveillance.LHO_list l
     LEFT JOIN atm_list a ON l.lho_id = a.lho_id
-    GROUP BY l.lho_id, l.lho_name;
-  `;
-  }
+    GROUP BY l.lho_id, l.lho_name;`;
 
   try {
-    // Fetch data from your database
     connection.query(query, [lho_id], async (err, results) => {
       if (err) {
         console.error('Error fetching data from MySQL:', err);
         return res.status(500).json({ message: 'Error retrieving data from the database.' });
       }
 
-      // Convert the concatenated string into an array
-      results = results.map((row) => ({
+      results = results.map(row => ({
         ...row,
         atm_ids: row.atm_ids ? row.atm_ids.split(',') : []
       }));
 
-      // Fetch data from the external API
-      const apiResponse = await axios.get('https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll');
+      const headers = { 'Content-Type': 'application/json', 'X-Password': 'thePass' };
+      let siteDetails = [], siteDetails2 = [];
 
-      // Parse the text response into JSON
-      const siteDetails = JSON.parse(apiResponse.data);
+      const fetchAPIData = async () => {
+        try {
+          const [itlApiData, birdsIApiData] = await Promise.all([
+            axios.post('https://tom.itlems.com/megaapi/CameraReport', {}, { headers }),
+            axios.get('https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll')
+          ]);
+          siteDetails2 = itlApiData.data;
+          siteDetails = JSON.parse(birdsIApiData.data);
+        } catch (error) {
+          console.error('Error fetching data from APIs:', error);
+        }
+      };
 
-      // Merge the site status with your database results
-      const enrichedResults = results.map((lho) => {
-        // Initialize counters for online and offline ATMs
-        let onlineCount = 0;
-        let offlineCount = 0;
+      await fetchAPIData();
 
-        // Map ATM IDs to their corresponding site status
-        const atmData = lho.atm_ids.map((atm_id) => {
-          const siteDetail = siteDetails.find((site) => site.ATM_ID === atm_id);
+      const atmIdSet = new Set();
+      const allSiteDetails = [...siteDetails];
+
+      siteDetails2.forEach(site => {
+        if (!atmIdSet.has(site.AtmID)) {
+          const lastCheckedTime = new Date(site.LastChecked);
+          const currentTime = new Date();
+          const timeDifference = (currentTime - lastCheckedTime) / 60000; // in minutes
+          const status = timeDifference <= 15 ? 'ONLINE' : 'OFFLINE';
+
+          allSiteDetails.push({
+            ATM_ID: site.AtmID,
+            unitname: site.BankName || 'N/A',
+            city: site.CityName || 'N/A',
+            state: site.StateName || 'N/A',
+            SiteStatus: status
+          });
+          atmIdSet.add(site.AtmID);
+        }
+      });
+
+      const enrichedResults = results.map(lho => {
+        let onlineCount = 0, offlineCount = 0;
+
+        const atmData = lho.atm_ids.map(atm_id => {
+          const siteDetail = allSiteDetails.find(site => site.ATM_ID === atm_id);
           const status = siteDetail ? siteDetail.SiteStatus : 'NO DATA';
-          const siteName = siteDetail ? siteDetail.unitname : 'NO DATA';
-          const city = siteDetail ? siteDetail.city : 'NO DATA';
-          const state = siteDetail ? siteDetail.state : 'NO DATA';
-
-          // Increment counters based on the status
-          if (status === 'ONLINE') {
-            onlineCount += 1;
-          } else if (status === 'OFFLINE') {
-            offlineCount += 1;
-          }
+          if (status === 'ONLINE') onlineCount++;
+          else if (status === 'OFFLINE') offlineCount++;
 
           return {
             atm_id,
-            siteName,
-            city,
-            state,
+            siteName: siteDetail ? siteDetail.unitname : 'NO DATA',
+            city: siteDetail ? siteDetail.city : 'NO DATA',
+            state: siteDetail ? siteDetail.state : 'NO DATA',
             status
           };
         });
 
-        // Calculate the percentage of online ATMs
         const totalATMs = onlineCount + offlineCount;
-        const percentage = totalATMs > 0 ? ((onlineCount / totalATMs) * 100).toFixed(2) : '0.00';
+        const percentage = totalATMs ? ((onlineCount / totalATMs) * 100).toFixed(2) : '0.00';
 
         return {
           ...lho,
@@ -379,8 +391,8 @@ app.get('/lho-list', async (req, res) => {
       return res.status(200).json(enrichedResults);
     });
   } catch (error) {
-    console.error('Error fetching data from the external API:', error);
-    return res.status(500).json({ message: 'Error retrieving data from the external API.' });
+    console.error('Error fetching data:', error);
+    return res.status(500).json({ message: 'Error retrieving data.' });
   }
 });
 
