@@ -87,7 +87,7 @@ app.post('/login', async (req, res) => {
 
       if (results.length === 0) {
         console.log('User not found:', EmailId);
-        return res.status(401).json({ error: 'Invalid EmailId or password' });
+        return res.status(401).json({ error: 'Username not found' });
       }
 
       const user = results[0];
@@ -109,9 +109,9 @@ app.post('/login', async (req, res) => {
           role: user.role,
           Id: user.Id
         },
-        'your-secret-key', // Replace with your secret key or use environment variables
+        'your-secret-key',
         {
-          expiresIn: '1h' // Token expires in 1 hour
+          expiresIn: '1h'
         }
       );
 
@@ -397,23 +397,40 @@ app.post('/add-lho', (req, res) => {
 });
 
 app.post('/add-atm', (req, res) => {
-  const query = `
-    INSERT INTO H_surveillance.atm_list (atm_id, lho_id) values (?, ?)
-    `;
-
-    const subAtm = ``
-
   const { atmId, lho_id } = req.body;
+
+  const query = `
+    INSERT INTO H_surveillance.atm_list (atm_id, lho_id) VALUES (?, ?)
+  `;
 
   connection.query(query, [atmId, lho_id], (error, result) => {
     if (error) {
-      console.error('Error inserting data into MySQL:', error);
       if (error.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ message: 'ATM ID already exists in different LHO.' });
+        // If there's a duplicate entry, fetch the LHO name of the existing ATM ID
+        const fetchLHOQuery = `
+          SELECT l.lho_id, l.lho_name 
+          FROM H_surveillance.atm_list a 
+          JOIN H_surveillance.LHO_list l ON a.lho_id = l.lho_id 
+          WHERE a.atm_id = ?;
+        `;
+        
+        connection.query(fetchLHOQuery, [atmId], (fetchError, fetchResult) => {
+          if (fetchError) {
+            console.error('Error fetching LHO data:', fetchError.message);
+            return res.status(500).json({ message: 'Error fetching LHO data from the database.' });
+          }
+          if (fetchResult.length > 0) {
+            return res.status(409).json({ message: `ATM ID already exists in ${fetchResult[0].lho_name}` });
+          } else {
+            return res.status(404).json({ message: 'ATM ID exists but no matching LHO found.' });
+          }
+        });
+      } else {
+        return res.status(500).json({ message: 'Error inserting data into the database.' });
       }
-      return res.status(500).json({ message: 'Error inserting data into the database.' });
+    } else {
+      return res.status(201).json({ message: 'ATM added successfully' });
     }
-    return res.status(201).json({ message: 'ATM added successfully' });
   });
 });
 
