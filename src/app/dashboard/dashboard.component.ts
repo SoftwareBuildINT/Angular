@@ -13,11 +13,20 @@ export class DashboardComponent implements OnInit {
   searchTerm: string = ''; // Holds the search input
   lhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
   filteredLhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
+  userRole: string | null = null; // Track user role
 
   constructor(private router: Router, private http: HttpClient) { }
 
   ngOnInit() {
     this.fetchLhoList(); // Fetch LHO data on component initialization
+    this.getUserRole(); // Fetch the user role from local storage
+  }
+
+  getUserRole(): void {
+    this.userRole = localStorage.getItem('roleId'); // Fetch the role stored as a string
+    if (!this.userRole) {
+      console.error('Role ID is not set or not recognized:', this.userRole); // Log for debugging
+    }
   }
 
   navigateToSiteDetails(lho: { LHO_Name: string; lho_id: number }) {
