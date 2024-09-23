@@ -124,7 +124,7 @@ app.post('/login', async (req, res) => {
       );
 
       // Respond with the JWT token
-      return res.status(200).json({ token });
+      return res.json({ role: user.role_id, token });
     });
   } catch (error) {
     console.error('Error during login:', error);
@@ -452,4 +452,40 @@ app.post('/add-atm', (req, res) => {
       return res.status(201).json({ message: 'ATM added successfully' });
     }
   });
+});
+
+app.get('/Role', async (req, res) => {
+  try {
+    // Query the database to get all users
+    connection.query('SELECT role_name FROM role', (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      // Return the user data as a JSON response
+      return res.status(200).json(results);
+    });
+  } catch (error) {
+    console.error('Error during fetching users:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/users', async (req, res) => {
+  try {
+    // Query the database to get all users
+    connection.query('SELECT email_id, first_name, last_name, contact, role_id FROM users', (err, results) => {
+      if (err) {
+        console.error('Database query error:', err);
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+
+      // Return the user data as a JSON response
+      return res.status(200).json(results);
+    });
+  } catch (error) {
+    console.error('Error during fetching users:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 });
