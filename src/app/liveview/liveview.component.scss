@@ -43,11 +43,11 @@
 
 // Camera frame styles
 .camera-frame {
-  background-color: #f0f0f0;
+  background-color: black; // Default black background before the video loads
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  position: relative; // To position the spinner correctly
   width: 350px;
   height: 280px;
   display: flex;
@@ -62,6 +62,28 @@ video {
   object-fit: cover;
 }
 
+// Loading spinner styles
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
 // Camera label styles
 .camera-label {
   padding: 10px;
