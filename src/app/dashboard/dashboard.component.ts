@@ -20,6 +20,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.fetchLhoList(); // Fetch LHO data on component initialization
     this.getUserRole(); // Fetch the user role from local storage
+    this.securanceLogin();
   }
 
   getUserRole(): void {
@@ -50,7 +51,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('https://sbi-dashboard.hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
+      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             console.log('Response from server:', response);
@@ -73,10 +74,10 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchLhoList() {
-    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard.hitachi.ifiber.in:7558/api/lho-list')
+    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
-          console.log('LHO List:', response);
+          // console.log('LHO List:', response);
           this.lhoList = response.map(lho => ({
             LHO_Name: lho.lho_name,
             lho_id: lho.lho_id,
@@ -93,6 +94,29 @@ export class DashboardComponent implements OnInit {
         }
       });
   }
+
+  securanceLogin() {
+    const loginPayload = {
+      email: 'Hitachi.SBI@securens.in',
+      password: 'E#K89GHp$boss'
+    };
+  
+    this.http.post<{ token: string; services: string }>('https://apip.sspl.securens.in:14333/api/login', loginPayload)
+      .subscribe({
+        next: (response) => {
+          // Store the token and services in localStorage
+          localStorage.setItem('authToken', response.token);
+          localStorage.setItem('services', response.services);
+  
+          // console.log("Securance token:", localStorage.getItem('authToken'));
+          console.log("Services:", localStorage.getItem('services'));
+        },
+        error: (error) => {
+          console.error('Login error:', error);
+          alert('Login failed. Please check your credentials.');
+        }
+      });
+  }  
 
   // Method to filter the LHO list based on search input
   filterLhoList() {

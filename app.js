@@ -38,7 +38,6 @@ app.post('/register', async (req, res) => {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
-
   try {
     // Check if the user with the given EmailId already exists
     connection.query('SELECT email_id FROM users WHERE email_id = ?', [email_id], (err, results) => {
@@ -53,28 +52,28 @@ app.post('/register', async (req, res) => {
 
       // Proceed with registration if the email is not in use
       hashPassword(password)
-      .then((hashedPassword) => {
-        connection.query(
-          'INSERT INTO users (email_id, password, first_name, last_name, contact, role_id) VALUES (?, ?, ?, ?, ?, ?)',
-          [email_id, hashedPassword, first_name, last_name, contact, role_id],
-          (err, results) => {
-            if (err) {
-              console.error('Database query error:', err);
-              return res.status(500).json({ error: 'Internal server error' });
+        .then((hashedPassword) => {
+          connection.query(
+            'INSERT INTO users (email_id, password, first_name, last_name, contact, role_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [email_id, hashedPassword, first_name, last_name, contact, role_id],
+            (err, results) => {
+              if (err) {
+                console.error('Database query error:', err);
+                return res.status(500).json({ error: 'Internal server error' });
+              }
+              return res.status(201).json({ message: 'User registered successfully' });
             }
-            return res.status(201).json({ message: 'User registered successfully' });
-          }
-        );
-      })
-      .catch((error) => {
-        console.error('Error during password hashing:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-      });
-  });
-} catch (error) {
-  console.error('Error during registration:', error);
-  return res.status(500).json({ error: 'Internal server error' });
-}
+          );
+        })
+        .catch((error) => {
+          console.error('Error during password hashing:', error);
+          return res.status(500).json({ error: 'Internal server error' });
+        });
+    });
+  } catch (error) {
+    console.error('Error during registration:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 // Login route
@@ -318,13 +317,14 @@ app.get('/lho-list', async (req, res) => {
         return res.status(500).json({ message: 'Error retrieving data from the database.' });
       }
 
-      results = results.map(row => ({
+      results = results.map((row) => ({
         ...row,
         atm_ids: row.atm_ids ? row.atm_ids.split(',') : []
       }));
 
       const headers = { 'Content-Type': 'application/json', 'X-Password': 'thePass' };
-      let siteDetails = [], siteDetails2 = [];
+      let siteDetails = [],
+        siteDetails2 = [];
 
       const fetchAPIData = async () => {
         try {
@@ -344,7 +344,7 @@ app.get('/lho-list', async (req, res) => {
       const atmIdSet = new Set();
       const allSiteDetails = [...siteDetails];
 
-      siteDetails2.forEach(site => {
+      siteDetails2.forEach((site) => {
         if (!atmIdSet.has(site.AtmID)) {
           const lastCheckedTime = new Date(site.LastChecked);
           const currentTime = new Date();
@@ -362,11 +362,12 @@ app.get('/lho-list', async (req, res) => {
         }
       });
 
-      const enrichedResults = results.map(lho => {
-        let onlineCount = 0, offlineCount = 0;
+      const enrichedResults = results.map((lho) => {
+        let onlineCount = 0,
+          offlineCount = 0;
 
-        const atmData = lho.atm_ids.map(atm_id => {
-          const siteDetail = allSiteDetails.find(site => site.ATM_ID === atm_id);
+        const atmData = lho.atm_ids.map((atm_id) => {
+          const siteDetail = allSiteDetails.find((site) => site.ATM_ID === atm_id);
           const status = siteDetail ? siteDetail.SiteStatus : 'NO DATA';
           if (status === 'ONLINE') onlineCount++;
           else if (status === 'OFFLINE') offlineCount++;
@@ -397,6 +398,82 @@ app.get('/lho-list', async (req, res) => {
   } catch (error) {
     console.error('Error fetching data:', error);
     return res.status(500).json({ message: 'Error retrieving data.' });
+  }
+});
+
+app.post('/securance-site-list/:atmId', async (req, res) => {
+  const { atmId } = req.params;
+  const { services, token } = req.body;
+
+  try {
+    // Fetch external API data
+    const fetchAPIData = async () => {
+      try {
+        const response = await axios({
+          method: 'post',
+          url: `https://apip.sspl.securens.in:14333/api/v1/siteList?services=${services}`,
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        return response.data.data;
+      } catch (error) {
+        console.error('Error fetching data from API:', error);
+        throw new Error('Failed to fetch data from external API');
+      }
+    };
+
+    const siteDetails = await fetchAPIData();
+    const matchedSite = siteDetails.find((site) => site.siteId === atmId);
+
+    if (matchedSite) {
+      const config = matchedSite.site_config[0];
+      const siteDataToStore = {
+        siteId: matchedSite.siteId,
+        dvr_user_id: config.dvr_user_id,
+        dvr_password: config.dvr_password,
+        dvr_manufacturer: config.dvr_manufacturer,
+        siteIp: config.dvr_ip,
+        camera_num: config.camera_num.split(',').length,
+        rtsp_port: config.rtsp_port
+      };
+
+      // Prepare parameters for the live view data request
+      const liveViewData = async () => {
+        try {
+          const response = await axios({
+            method: 'post',
+            url: `https://apip.sspl.securens.in:14333/api/v1/livestreaming?dvr_user_id=${encodeURIComponent(config.dvr_user_id)}&dvr_password=${encodeURIComponent(config.dvr_password)}&dvr_manufacturer=${encodeURIComponent(config.dvr_manufacturer)}&siteIp=${encodeURIComponent(config.dvr_ip)}&camera_num=${encodeURIComponent(siteDataToStore.camera_num)}&rtsp_port=${encodeURIComponent(config.rtsp_port)}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          return response.data.data; // Assuming the response data structure
+        } catch (error) {
+          console.error('Error fetching data from API:', error.response ? error.response.data : error.message);
+          throw new Error('Failed to fetch data from external API');
+        }
+      };
+
+      const liveViewLinks = await liveViewData();
+
+      // Send a success response with the matched data
+      res.status(200).json({
+        siteId: siteDataToStore.siteId,
+        liveViewLinks: liveViewLinks
+      });
+    } else {
+      res.status(404).json({
+        message: 'ATM ID not found in external API data'
+      });
+    }
+  } catch (error) {
+    console.error('Error in /securance-site-list:', error.message);
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: error.message
+    });
   }
 });
 
@@ -433,7 +510,7 @@ app.post('/add-atm', (req, res) => {
           JOIN H_surveillance.LHO_list l ON a.lho_id = l.lho_id 
           WHERE a.atm_id = ?;
         `;
-        
+
         connection.query(fetchLHOQuery, [atmId], (fetchError, fetchResult) => {
           if (fetchError) {
             console.error('Error fetching LHO data:', fetchError.message);

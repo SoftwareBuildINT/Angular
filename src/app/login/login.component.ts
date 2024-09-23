@@ -27,9 +27,6 @@ export class LoginComponent {
           // Store the token and role ID in localStorage
           localStorage.setItem('token', response.token);
           localStorage.setItem('roleId', response.role.toString()); // Store as a string
-          
-          //console.log('Token stored:', response.token);
-          //console.log('Role ID stored:', response.role);
 
           // Redirect to the dashboard
           this.router.navigate(['/dashboard']);

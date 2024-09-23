@@ -53,7 +53,7 @@ export class SidedetailsComponent implements OnInit {
     if (this.lhoId) {
       this.dataService.getLhoList(this.lhoId).subscribe(
         (data: any) => {
-          console.log('API response:', data);
+          // console.log('API response:', data);
 
           if (data && Array.isArray(data)) {
             const lho = data[0];
@@ -68,9 +68,9 @@ export class SidedetailsComponent implements OnInit {
             this.onlineCount = lho.onlineCount;
             this.offlineCount = lho.offlineCount;
 
-            console.log('Site list fetched and formatted successfully:', this.siteList);
-            console.log('Online count:', this.onlineCount);
-            console.log('Offline count:', this.offlineCount);
+            // console.log('Site list fetched and formatted successfully:', this.siteList);
+            // console.log('Online count:', this.onlineCount);
+            // console.log('Offline count:', this.offlineCount);
           } else {
             console.error('Unexpected response format:', data);
           }
