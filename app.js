@@ -18,6 +18,13 @@ const connection = mysql.createPool({
   password: 'buildINT@2023$',
   database: 'H_surveillance'
 });
+
+const port = process.env.PORT || 7558;
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
 // Function to hash the password
 const hashPassword = async (password) => {
   const saltRounds = 10;
@@ -70,9 +77,6 @@ app.post('/register', async (req, res) => {
 }
 });
 
-app.listen(5000, () => {
-console.log('Server running on port 5000');
-});
 // Login route
 app.post('/login', async (req, res) => {
   const { EmailId, password } = req.body;
@@ -448,9 +452,4 @@ app.post('/add-atm', (req, res) => {
       return res.status(201).json({ message: 'ATM added successfully' });
     }
   });
-});
-
-const port = process.env.PORT || 5002;
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
 });
