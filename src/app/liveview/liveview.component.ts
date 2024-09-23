@@ -62,7 +62,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Your existing ngAfterViewInit for streaming functionality
   ngAfterViewInit() {
-    function loadStream(videoElementId: string, streamUrl: string) {
+    function loadStream(videoElementId: string, streamUrl: string, spinnerId: string) {
       // console.log("The function has started!");
       const video = document.getElementById(videoElementId) as HTMLVideoElement;
       const spinner = document.getElementById(spinnerId);
