@@ -14,6 +14,7 @@ export class DashboardComponent implements OnInit {
   lhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
   filteredLhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
   userRole: string | null = null; // Track user role
+  loading: boolean = true; // Track loading state
 
   constructor(private router: Router, private http: HttpClient) { }
 
@@ -49,17 +50,14 @@ export class DashboardComponent implements OnInit {
 
   saveLho() {
     if (this.lhoName.trim()) {
-      console.log('LHO Name:', this.lhoName);
-      this.http.post('https://sbi-dashboard.hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
+      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
-            console.log('Response from server:', response);
             alert(response.message || 'LHO saved successfully.');
             this.closeModal(); // Close the modal after saving
             this.fetchLhoList(); // Refresh the LHO list after saving
           },
           error: (error) => {
-            console.error('Error saving LHO:', error);
             if (error.status === 409) {
               alert('LHO Name already exists in the database.');
             } else {
@@ -73,10 +71,10 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchLhoList() {
-    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard.hitachi.ifiber.in:7558/api/lho-list')
+    this.loading = true; // Set loading to true while fetching data
+    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
-          console.log('LHO List:', response);
           this.lhoList = response.map(lho => ({
             LHO_Name: lho.lho_name,
             lho_id: lho.lho_id,
@@ -86,10 +84,11 @@ export class DashboardComponent implements OnInit {
             percentage: parseFloat(lho.percentage.toFixed(2)) // Convert back to a number
           }));
           this.filteredLhoList = [...this.lhoList]; // Initialize the filtered list
+          this.loading = false; // Set loading to false after data is fetched
         },
-        error: (error) => {
-          console.error('Error fetching LHO list:', error);
+        error: () => {
           alert('An error occurred while fetching the LHO list.');
+          this.loading = false; // Set loading to false if an error occurs
         }
       });
   }
