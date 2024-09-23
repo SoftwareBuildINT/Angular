@@ -492,3 +492,16 @@
   }
 }
 
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px; /* Adjust height as necessary */
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
