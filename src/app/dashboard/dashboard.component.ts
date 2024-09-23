@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('http://103.141.219.138:7558/api/add-lho', { lho_name: this.lhoName })
+      this.http.post('http://sbi-dashboard.hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             console.log('Response from server:', response);
@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchLhoList() {
-    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('http://103.141.219.138:7558/api/lho-list')
+    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('http://sbi-dashboard.hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
           console.log('LHO List:', response);

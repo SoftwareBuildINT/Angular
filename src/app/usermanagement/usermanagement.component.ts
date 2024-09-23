@@ -18,7 +18,7 @@ export class UsermanagementComponent implements OnInit {
   }
 
   fetchUsers(): void {
-    this.http.get('http://103.141.219.138:7558/api/users').subscribe(
+    this.http.get('http://sbi-dashboard.hitachi.ifiber.in:7558/api/users').subscribe(
       (data: any) => {
         this.users = data; // Assign the user data to the 'users' variable
       },

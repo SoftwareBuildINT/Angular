@@ -10,7 +10,7 @@ import { throwError } from 'rxjs';
   styleUrls: ['./adduser.component.scss']
 })
 export class AdduserComponent {
-  apiUrl = 'http://103.141.219.138:7558/api/register'; // Update with your API URL
+  apiUrl = 'http://sbi-dashboard.hitachi.ifiber.in:7558/api/register'; // Update with your API URL
 
   user = {
     firstName: '',
