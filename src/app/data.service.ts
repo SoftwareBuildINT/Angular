@@ -6,8 +6,9 @@ import { catchError, map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
+
 export class DataService {
-  private loginUrl = 'http://localhost:5000/login'; // Login API URL
+  private loginUrl = 'http://103.141.219.138:7558/api/login'; // Login API URL
   private siteListUrl = 'https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'; // Site list API URL
   private dashboardUrl = 'http://localhost:5000/dashboard'; // Dashboard API URL
 
@@ -44,13 +45,13 @@ export class DataService {
   }
 
   getLhoList(lhoId: string): Observable<any> {
-    const apiUrl = `http://localhost:5000/lho-list?lho_id=${lhoId}`;
+    const apiUrl = `http://103.141.219.138:7558/api/lho-list?lho_id=${lhoId}`;
     return this.http.get(apiUrl, { responseType: 'json' });
   }
 
   // Method to add a new ATM
   addATM(atmData: { atmId: string; lho_id: string }): Observable<any> {
-    const apiUrl = `http://localhost:5000/add-atm`;
+    const apiUrl = `http://103.141.219.138:7558/api/add-atm`;
     return this.http.post(apiUrl, atmData, { responseType: 'json' });
   }
 
