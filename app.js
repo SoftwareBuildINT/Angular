@@ -438,31 +438,48 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
         rtsp_port: config.rtsp_port
       };
 
-      // Prepare parameters for the live view data request
-      const liveViewData = async () => {
+      let camera_num = config.camera_num.split(',');
+      let cameras = camera_num.map(camera => Number(camera));
+
+      // Prepare the function to fetch live view data for each camera
+      const fetchLiveViewData = async (camera) => {
         try {
           const response = await axios({
             method: 'post',
-            url: `https://apip.sspl.securens.in:14333/api/v1/livestreaming?dvr_user_id=${encodeURIComponent(config.dvr_user_id)}&dvr_password=${encodeURIComponent(config.dvr_password)}&dvr_manufacturer=${encodeURIComponent(config.dvr_manufacturer)}&siteIp=${encodeURIComponent(config.dvr_ip)}&camera_num=${encodeURIComponent(siteDataToStore.camera_num)}&rtsp_port=${encodeURIComponent(config.rtsp_port)}`,
+            url: `https://apip.sspl.securens.in:14333/api/v1/livestreaming?dvr_user_id=${encodeURIComponent(config.dvr_user_id)}&dvr_password=${encodeURIComponent(config.dvr_password)}&dvr_manufacturer=${encodeURIComponent(config.dvr_manufacturer)}&siteIp=${encodeURIComponent(config.dvr_ip)}&camera_num=${encodeURIComponent(camera)}&rtsp_port=${encodeURIComponent(config.rtsp_port)}`,
             headers: {
               Authorization: `Bearer ${token}`,
               'Content-Type': 'application/json'
             }
           });
-          return response.data.data; // Assuming the response data structure
+          return response.data.data;
         } catch (error) {
-          console.error('Error fetching data from API:', error.response ? error.response.data : error.message);
-          throw new Error('Failed to fetch data from external API');
+          console.error(`Error fetching live view data for camera ${camera}:`, error.response ? error.response.data : error.message);
+          throw new Error(`Failed to fetch live view data for camera ${camera}`);
         }
       };
 
-      const liveViewLinks = await liveViewData();
+      // Loop through each camera and fetch live view data
+      const liveViewLinksPromises = cameras.map(camera => fetchLiveViewData(camera));
+      const liveViewLinksArray = await Promise.all(liveViewLinksPromises);
 
-      // Send a success response with the matched data
-      res.status(200).json({
-        siteId: siteDataToStore.siteId,
-        liveViewLinks: liveViewLinks
+
+
+      // Build dynamic response object
+      const responseObj = {
+        siteId: siteDataToStore.siteId
+      };
+
+      // Loop through cameras and add live view data for each camera in the response object
+      liveViewLinksArray.forEach((liveViewLinks, index) => {
+        responseObj[`camera_${index + 1}`] = {
+          liveViewLinks: liveViewLinks
+        };
       });
+
+      console.log("Live View Links successfully fetched for all cameras");
+      // Send the dynamic response
+      res.status(200).json(responseObj);
     } else {
       res.status(404).json({
         message: 'ATM ID not found in external API data'
