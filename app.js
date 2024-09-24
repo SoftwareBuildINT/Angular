@@ -436,17 +436,26 @@ app.get('/lho-list', async (req, res) => {
       }));
 
       const headers = { 'Content-Type': 'application/json', 'X-Password': 'thePass' };
-      let siteDetails = [],
-        siteDetails2 = [];
+      let siteDetails = [], siteDetails2 = [], siteDetails3 = [];
 
       const fetchAPIData = async () => {
         try {
-          const [itlApiData, birdsIApiData] = await Promise.all([
+          const [itlApiData, birdsIApiData, newVendorApiData] = await Promise.all([
             axios.post('https://tom.itlems.com/megaapi/CameraReport', {}, { headers }),
-            axios.get('https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll')
+            axios.get('https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'),
+            axios.get('https://icms.sspl.securens.in:15101/Lotus/api/AllSiteDetails')
           ]);
-          siteDetails2 = itlApiData.data;
+          siteDetails2 = itlApiData.data; 
           siteDetails = JSON.parse(birdsIApiData.data);
+          
+          // Parse new vendor data
+          // console.log(newVendorApiData.data['data']);
+          const newVendorData = newVendorApiData.data['data'].split('||').map(record => {
+            const [ATM_ID, unitname, state, city, SiteStatus] = record.split('|');
+            return { ATM_ID, unitname, state, city, SiteStatus };
+          });
+          siteDetails3 = newVendorData;
+          console.log(siteDetails3);
         } catch (error) {
           console.error('Error fetching data from APIs:', error);
         }
@@ -457,6 +466,7 @@ app.get('/lho-list', async (req, res) => {
       const atmIdSet = new Set();
       const allSiteDetails = [...siteDetails];
 
+      // Process data from first two APIs
       siteDetails2.forEach((site) => {
         if (!atmIdSet.has(site.AtmID)) {
           const lastCheckedTime = new Date(site.LastChecked);
@@ -475,9 +485,22 @@ app.get('/lho-list', async (req, res) => {
         }
       });
 
+      siteDetails3.forEach((site) => {
+        if (!atmIdSet.has(site.ATM_ID)) {
+          allSiteDetails.push({
+            ATM_ID: site.ATM_ID,                 // Mapping ATM_ID
+            unitname: site.unitname || 'N/A',  // Mapping ATM Address to unitname
+            city: site.city || 'N/A',            // Mapping city
+            state: site.state || 'N/A',          // Mapping STATE
+            SiteStatus: site.SiteStatus || 'NO DATA'  // Mapping Online/Offline Status
+          });
+          atmIdSet.add(site.ATM_ID);
+        }
+      });
+      
+
       const enrichedResults = results.map((lho) => {
-        let onlineCount = 0,
-          offlineCount = 0;
+        let onlineCount = 0, offlineCount = 0;
 
         const atmData = lho.atm_ids.map((atm_id) => {
           const siteDetail = allSiteDetails.find((site) => site.ATM_ID === atm_id);
@@ -513,6 +536,7 @@ app.get('/lho-list', async (req, res) => {
     return res.status(500).json({ message: 'Error retrieving data.' });
   }
 });
+
 
 app.post('/securance-site-list/:atmId', async (req, res) => {
   const { atmId } = req.params;
