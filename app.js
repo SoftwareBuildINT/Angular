@@ -131,7 +131,7 @@ app.post('/convert-rtsp', (req, res) => {
   startRtspToHls(rtspUrl, cameraId, atmId);
 
   // Return the HLS stream URL to the client
-  const hlsUrl = `http://localhost:${port}/streams/${cameraId}/output.m3u8`;
+  const hlsUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/streams/${cameraId}/output.m3u8`;
   res.json({ hlsUrl });
 });
 
