@@ -29,7 +29,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Function to call API with atmId
   callApiWithAtmId(atmId: string) {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/securance-site-list/${atmId}`;
+    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/securance-site-list/${atmId}`;
 
     const token = localStorage.getItem('authToken');
     const services = localStorage.getItem('services');
@@ -58,7 +58,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Function to check vendor and decide the next steps
   checkVendorAndLoadStreams() {
-    const vendorApiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/atm-vendor`;
+    const vendorApiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/atm-vendor`;
 
     // Create the payload with atmId in the body
     const payload = { atmId: this.atmId };
@@ -114,7 +114,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
     });
 
     // Check if the file exists by calling a backend endpoint
-    const checkUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/check-file-exists?path=${filePath}`; // Backend route to check file existence
+    const checkUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/check-file-exists?path=${filePath}`; // Backend route to check file existence
 
     this.http.get(checkUrl, { headers })
       .subscribe({
@@ -158,7 +158,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Convert RTSP to HLS using API and load into video elements
   convertRtspToHls(rtspUrl: string, cameraId: string) {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/convert-rtsp`;
+    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/convert-rtsp`;
 
     const payload = {
       rtspUrl: rtspUrl,
