@@ -5,6 +5,9 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 const app = express();
 app.use(cors());
 
@@ -24,6 +27,116 @@ const port = process.env.PORT || 7558;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+// Directory to store HLS streams
+const streamDir = path.join(__dirname, 'src', 'assets', 'streams');
+if (!fs.existsSync(streamDir)) {
+  fs.mkdirSync(streamDir, { recursive: true });
+}
+
+// Function to start RTSP to HLS conversion
+function startRtspToHls(rtspUrl, cameraId, atmId) {
+  // Create a directory for each atmId and organize camera streams inside
+  const outputDir = path.join(streamDir, atmId, cameraId);
+
+  // Create directory for this atmId and camera's stream
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
+  const ffmpegArgs = [
+    '-v',
+    'debug',
+    '-rtsp_transport',
+    'tcp', // RTSP over TCP for better stability
+    '-i',
+    rtspUrl, // Input RTSP stream URL
+    '-f',
+    'hls', // Output format: HLS
+    '-hls_time',
+    '2', // Segment duration (in seconds)
+    '-hls_list_size',
+    '5', // Number of segments in the playlist
+    '-hls_flags',
+    'delete_segments', // Remove old segments
+    path.join(outputDir, 'output.m3u8') // Output HLS file path
+  ];
+
+  // Start the FFmpeg process
+  const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
+
+  // Log FFmpeg stdout and stderr for debugging
+  ffmpegProcess.stdout.on('data', (data) => {
+    console.log(`[${atmId}][${cameraId}] stdout: ${data}`);
+  });
+
+  ffmpegProcess.stderr.on('data', (data) => {
+    console.error(`[${atmId}][${cameraId}] stderr: ${data}`);
+  });
+
+  ffmpegProcess.on('close', (code) => {
+    console.log(`[${atmId}][${cameraId}] FFmpeg process exited with code ${code}`);
+  });
+}
+
+app.get('/check-file-exists', (req, res) => {
+  const filePath = path.join(__dirname, req.query.path); // Construct the full file path
+
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      return res.json({ exists: false });
+    }
+    res.json({ exists: true });
+  });
+});
+
+app.post('/clear-streams', (req, res) => {
+  // Clear the streams folder
+  fs.readdir(streamDir, (err, files) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error reading streams folder' });
+    }
+
+    // Remove each file in the folder
+    const fileDeletionPromises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        fs.unlink(path.join(streamDir, file), (err) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+    });
+
+    Promise.all(fileDeletionPromises)
+      .then(() => {
+        res.json({ message: 'Streams folder cleared' });
+      })
+      .catch((err) => {
+        res.status(500).json({ message: 'Error deleting files', error: err });
+      });
+  });
+});
+
+// API Endpoint to start RTSP-to-HLS conversion
+app.post('/convert-rtsp', (req, res) => {
+  const { rtspUrl, cameraId, atmId } = req.body;
+
+  if (!rtspUrl || !cameraId) {
+    return res.status(400).json({ error: 'RTSP URL and Camera ID are required' });
+  }
+
+  // Start the conversion
+  startRtspToHls(rtspUrl, cameraId, atmId);
+
+  // Return the HLS stream URL to the client
+  const hlsUrl = `http://localhost:${port}/streams/${cameraId}/output.m3u8`;
+  res.json({ hlsUrl });
+});
+
+// Serve static HLS streams
+app.use('/streams', express.static(streamDir));
 
 // Function to hash the password
 const hashPassword = async (password) => {
@@ -439,7 +552,9 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
       };
 
       let camera_num = config.camera_num.split(',');
-      let cameras = camera_num.map(camera => Number(camera));
+      let cameras = camera_num.map((camera) => Number(camera));
+
+      console.log(siteDataToStore);
 
       // Prepare the function to fetch live view data for each camera
       const fetchLiveViewData = async (camera) => {
@@ -460,10 +575,8 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
       };
 
       // Loop through each camera and fetch live view data
-      const liveViewLinksPromises = cameras.map(camera => fetchLiveViewData(camera));
+      const liveViewLinksPromises = cameras.map((camera) => fetchLiveViewData(camera));
       const liveViewLinksArray = await Promise.all(liveViewLinksPromises);
-
-
 
       // Build dynamic response object
       const responseObj = {
@@ -477,7 +590,7 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
         };
       });
 
-      console.log("Live View Links successfully fetched for all cameras");
+      console.log('Live View Links successfully fetched for all cameras');
       // Send the dynamic response
       res.status(200).json(responseObj);
     } else {
@@ -492,6 +605,23 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
       error: error.message
     });
   }
+});
+
+app.post('/atm-vendor', (req, res) => {
+  const atmId = req.body.atmId;
+
+  const query = `SELECT vendor FROM H_surveillance.atm_list WHERE atm_id = ?;`;
+
+  connection.query(query, [atmId], (err, result) => {
+    if (err) {
+      console.error('Error fetching data from MySQL:', err);
+      return res.status(500).json({ message: 'Error fetching data from the database.' });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'Vendor not found in the database.' });
+    }
+    return res.status(200).json({ vendor: result[0].vendor });
+  });
 });
 
 app.post('/add-lho', (req, res) => {
