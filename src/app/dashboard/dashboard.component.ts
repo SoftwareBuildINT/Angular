@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
+      this.http.post('http://localhost:7558/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             alert(response.message || 'LHO saved successfully.');
@@ -74,7 +74,7 @@ export class DashboardComponent implements OnInit {
 
   fetchLhoList() {
     this.loading = true; // Set loading to true while fetching data
-    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
+    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('http://localhost:7558/lho-list')
       .subscribe({
         next: (response) => {
           this.lhoList = response.map(lho => ({

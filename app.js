@@ -8,6 +8,7 @@ const axios = require('axios');
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const app = express();
 app.use(cors());
 
@@ -31,6 +32,7 @@ const port = process.env.PORT || 7558;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+let ffmpegProcess;
 
 // Directory to store HLS streams
 const streamDir = path.join(__dirname, 'src', 'assets', 'streams');
@@ -38,7 +40,31 @@ if (!fs.existsSync(streamDir)) {
   fs.mkdirSync(streamDir, { recursive: true });
 }
 
-let ffmpegProcess;
+// Function to hash the password
+const hashPassword = async (password) => {
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
+};
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const { atmId, cameraId } = req.body;
+    
+    // Set the path where files will be saved, using atmId and cameraId
+    const streamDir = path.join(__dirname, 'src', 'assets', 'streams', atmId, cameraId);
+    if (!fs.existsSync(streamDir)) {
+      fs.mkdirSync(streamDir, { recursive: true });
+    }
+    
+    cb(null, streamDir); // Save files in the atmId/cameraId directory
+  },
+  filename: (req, file, cb) => {
+    // Keep the original filename or customize as needed
+    cb(null, file.originalname);
+  }
+});
+
+const upload = multer({ storage: storage });
 
 // Function to start RTSP to HLS conversion
 function startRtspToHls(rtspUrl, cameraId, atmId) {
@@ -153,11 +179,21 @@ app.post('/convert-rtsp', (req, res) => {
 // Serve static HLS streams
 app.use('/streams', express.static(streamDir));
 
-// Function to hash the password
-const hashPassword = async (password) => {
-  const saltRounds = 10;
-  return await bcrypt.hash(password, saltRounds);
-};
+app.post('/get-hls-streams', upload.single('hlsFile'), (req, res) => {
+  const { atmId, cameraId } = req.body;
+  const file = req.file; // Multer saves the file to the directory
+  
+  if (!file) {
+    return res.status(400).send('No file uploaded');
+  }
+
+  res.status(200).send({
+    message: 'HLS stream file saved successfully',
+    filePath: file.path,
+    atmId: atmId,
+    cameraId: cameraId
+  });
+});
 
 app.post('/register', async (req, res) => {
   const { email_id, password, first_name, last_name, contact, role_id } = req.body;
@@ -423,22 +459,34 @@ app.get('/LHO', (req, res) => {
 app.get('/lho-list', async (req, res) => {
   const lho_id = req.query.lho_id;
 
-  const query = lho_id
-    ? `
-    SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
-    GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
-    FROM H_surveillance.LHO_list l
-    JOIN atm_list a ON l.lho_id = a.lho_id
-    WHERE l.lho_id = ?
-    GROUP BY l.lho_id, l.lho_name;`
-    : `
-    SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
-    GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
-    FROM H_surveillance.LHO_list l
-    LEFT JOIN atm_list a ON l.lho_id = a.lho_id
-    GROUP BY l.lho_id, l.lho_name;`;
-
   try {
+    await new Promise((resolve, reject) => {
+      connection.query('SET SESSION group_concat_max_len = 1000000;', (err) => {
+        if (err) {
+          console.error('Error setting session variable:', err);
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+
+    // Second query: Fetch the LHO list with ATM IDs
+    const query = lho_id
+      ? `
+      SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
+      GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
+      FROM H_surveillance.LHO_list l
+      JOIN atm_list a ON l.lho_id = a.lho_id
+      WHERE l.lho_id = ?
+      GROUP BY l.lho_id, l.lho_name;`
+      : `
+      SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
+      GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
+      FROM H_surveillance.LHO_list l
+      LEFT JOIN atm_list a ON l.lho_id = a.lho_id
+      GROUP BY l.lho_id, l.lho_name;`;
+
     connection.query(query, [lho_id], async (err, results) => {
       if (err) {
         console.error('Error fetching data from MySQL:', err);
@@ -451,9 +499,7 @@ app.get('/lho-list', async (req, res) => {
       }));
 
       const headers = { 'Content-Type': 'application/json', 'X-Password': 'thePass' };
-      let siteDetails = [],
-        siteDetails2 = [],
-        siteDetails3 = [];
+      let siteDetails = [], siteDetails2 = [], siteDetails3 = [];
 
       const fetchAPIData = async () => {
         try {
@@ -471,7 +517,6 @@ app.get('/lho-list', async (req, res) => {
           siteDetails = JSON.parse(birdsIApiData.data);
           siteDetails2 = itlApiData.data;
           siteDetails3 = securanceData;
-          // console.log(siteDetails3);
         } catch (error) {
           console.error('Error fetching data from APIs:', error);
         }
@@ -482,7 +527,6 @@ app.get('/lho-list', async (req, res) => {
       const atmIdSet = new Set();
       const allSiteDetails = [...siteDetails];
 
-      // Process data from first two APIs
       siteDetails2.forEach((site) => {
         if (!atmIdSet.has(site.AtmID)) {
           const lastCheckedTime = new Date(site.LastChecked);
@@ -515,8 +559,7 @@ app.get('/lho-list', async (req, res) => {
       });
 
       const enrichedResults = results.map((lho) => {
-        let onlineCount = 0,
-          offlineCount = 0;
+        let onlineCount = 0, offlineCount = 0;
 
         const atmData = lho.atm_ids.map((atm_id) => {
           const siteDetail = allSiteDetails.find((site) => site.ATM_ID === atm_id);
