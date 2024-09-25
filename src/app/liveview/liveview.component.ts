@@ -174,7 +174,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
       .subscribe({
         next: (response: any) => {
           console.log('RTSP to HLS conversion successful:', response);
-          const hlsUrl = `assets/streams/${cameraId}/output.m3u8`;
+          const hlsUrl = `assets/streams/${payload.atmId}/${cameraId}/output.m3u8`;
           this.loadStream(cameraId, hlsUrl);
         },
         error: (error) => {
