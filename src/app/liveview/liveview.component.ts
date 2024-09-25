@@ -141,10 +141,10 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
   playStreamsDirectly() {
     // Define the direct file paths for the camera streams
     const filePaths = {
-      camera_1: 'assets/streams/camera_1/output.m3u8',
-      camera_2: 'assets/streams/camera_2/output.m3u8',
-      camera_3: 'assets/streams/camera_3/output.m3u8',
-      camera_4: 'assets/streams/camera_4/output.m3u8'
+      camera_1: `assets/streams/${this.atmId}/camera_1/output.m3u8`,
+      camera_2: `assets/streams/${this.atmId}/camera_2/output.m3u8`,
+      camera_3: `assets/streams/${this.atmId}/camera_3/output.m3u8`,
+      camera_4: `assets/streams/${this.atmId}/camera_4/output.m3u8`
     };
 
     // Poll for each camera stream file
@@ -152,7 +152,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
       const filePath = filePaths[cameraKey];
       // console.log("filePath",filePath);
       // console.log("cameraKey",cameraKey);
-      this.loadStream(cameraKey, filePath); 
+      this.loadStream(cameraKey, filePath);
     });
   }
 
@@ -187,12 +187,12 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
   loadStream(cameraId: string, streamUrl: string) {
     const videoElementId = `video_${cameraId}`;
     const video = document.getElementById(videoElementId) as HTMLVideoElement;
-  
+
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(streamUrl);
       hls.attachMedia(video);
-  
+
       // Wait for user interaction to start playback
       document.addEventListener('click', () => {
         video.muted = true; // Ensure it's muted to bypass autoplay restrictions
@@ -200,18 +200,18 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
           console.error('Autoplay error:', error);
         });
       });
-  
+
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         console.log('HLS manifest parsed, ready to play');
       });
-  
+
       hls.on(Hls.Events.ERROR, (event, data) => {
         console.error('HLS error:', data);
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       video.src = streamUrl;
       video.muted = true; // Ensure muted is set
-  
+
       document.addEventListener('click', () => {
         video.play().catch((error) => {
           console.error('Autoplay error:', error);
@@ -221,7 +221,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
       console.error('HLS not supported in this browser');
     }
   }
-  
+
   // ngAfterViewInit runs after the view has been initialized
   ngAfterViewInit() {
     if (this.atmId) {

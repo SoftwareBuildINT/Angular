@@ -21,7 +21,7 @@ export class AdduserComponent {
     password: ''
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // Validate that only numeric characters are entered for the phone number
   validatePhoneNumber(event: KeyboardEvent): void {
@@ -56,7 +56,7 @@ export class AdduserComponent {
     if (form.valid) {
       // Map role to ID if necessary
       const roleId = this.mapRoleToId(this.user.role);
-  
+
       const userData = {
         first_name: this.user.firstName,
         last_name: this.user.lastName,
@@ -65,9 +65,9 @@ export class AdduserComponent {
         role_id: roleId, // Ensure this is a numeric ID
         password: this.user.password
       };
-  
+
       console.log('Submitting data:', userData);
-  
+
       this.http.post(this.apiUrl, userData, {
         headers: { 'Content-Type': 'application/json' }
       }).pipe(
@@ -85,7 +85,7 @@ export class AdduserComponent {
       alert('Please fill in all required fields.');
     }
   }
-  
+
   // Map role name to ID (example mapping)
   mapRoleToId(roleName: string): number {
     const roleMap: { [key: string]: number } = {
@@ -94,5 +94,5 @@ export class AdduserComponent {
     };
     return roleMap[roleName.toLowerCase()] || 0; // Default to 0 if role not found
   }
-  
+
 }

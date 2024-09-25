@@ -100,14 +100,14 @@ export class DashboardComponent implements OnInit {
       email: 'Hitachi.SBI@securens.in',
       password: 'E#K89GHp$boss'
     };
-  
+
     this.http.post<{ token: string; services: string }>('https://apip.sspl.securens.in:14333/api/login', loginPayload)
       .subscribe({
         next: (response) => {
           // Store the token and services in localStorage
           localStorage.setItem('authToken', response.token);
           localStorage.setItem('services', response.services);
-  
+
           // console.log("Securance token:", localStorage.getItem('authToken'));
           console.log("Services:", localStorage.getItem('services'));
         },

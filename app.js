@@ -23,7 +23,7 @@ const connection = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  connectTimeout: 10000 
+  connectTimeout: 10000
 });
 
 const port = process.env.PORT || 7558;
@@ -37,6 +37,8 @@ const streamDir = path.join(__dirname, 'src', 'assets', 'streams');
 if (!fs.existsSync(streamDir)) {
   fs.mkdirSync(streamDir, { recursive: true });
 }
+
+let ffmpegProcess;
 
 // Function to start RTSP to HLS conversion
 function startRtspToHls(rtspUrl, cameraId, atmId) {
@@ -67,7 +69,7 @@ function startRtspToHls(rtspUrl, cameraId, atmId) {
   ];
 
   // Start the FFmpeg process
-  const ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
+  ffmpegProcess = spawn('ffmpeg', ffmpegArgs);
 
   // Log FFmpeg stdout and stderr for debugging
   ffmpegProcess.stdout.on('data', (data) => {
@@ -81,6 +83,15 @@ function startRtspToHls(rtspUrl, cameraId, atmId) {
   ffmpegProcess.on('close', (code) => {
     console.log(`[${atmId}][${cameraId}] FFmpeg process exited with code ${code}`);
   });
+
+}
+
+// Function to stop the ffmpeg process
+function stopFfmpeg() {
+  if (ffmpegProcess) {
+    ffmpegProcess.kill('SIGINT'); // Gracefully stop the process
+    console.log('ffmpeg process terminated');
+  }
 }
 
 app.get('/check-file-exists', (req, res) => {
@@ -135,7 +146,7 @@ app.post('/convert-rtsp', (req, res) => {
   startRtspToHls(rtspUrl, cameraId, atmId);
 
   // Return the HLS stream URL to the client
-  const hlsUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/streams/${cameraId}/output.m3u8`;
+  const hlsUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/streams/${atmId}/${cameraId}/output.m3u8`;
   res.json({ hlsUrl });
 });
 
@@ -440,7 +451,9 @@ app.get('/lho-list', async (req, res) => {
       }));
 
       const headers = { 'Content-Type': 'application/json', 'X-Password': 'thePass' };
-      let siteDetails = [], siteDetails2 = [], siteDetails3 = [];
+      let siteDetails = [],
+        siteDetails2 = [],
+        siteDetails3 = [];
 
       const fetchAPIData = async () => {
         try {
@@ -450,13 +463,13 @@ app.get('/lho-list', async (req, res) => {
             axios.get('https://icms.sspl.securens.in:15101/Lotus/api/AllSiteDetails')
           ]);
 
-          const securanceData = securanceApiData.data['data'].split('||').map(record => {
+          const securanceData = securanceApiData.data['data'].split('||').map((record) => {
             const [ATM_ID, unitname, state, city, SiteStatus] = record.split('|');
             return { ATM_ID, unitname, state, city, SiteStatus };
           });
 
           siteDetails = JSON.parse(birdsIApiData.data);
-          siteDetails2 = itlApiData.data; 
+          siteDetails2 = itlApiData.data;
           siteDetails3 = securanceData;
           // console.log(siteDetails3);
         } catch (error) {
@@ -491,25 +504,28 @@ app.get('/lho-list', async (req, res) => {
       siteDetails3.forEach((site) => {
         if (!atmIdSet.has(site.ATM_ID)) {
           allSiteDetails.push({
-            ATM_ID: site.ATM_ID,                 // Mapping ATM_ID
-            unitname: site.unitname || 'N/A',  // Mapping ATM Address to unitname
-            city: site.city || 'N/A',            // Mapping city
-            state: site.state || 'N/A',          // Mapping STATE
-            SiteStatus: site.SiteStatus || 'NO DATA'  // Mapping Online/Offline Status
+            ATM_ID: site.ATM_ID,
+            unitname: site.unitname || 'N/A',
+            city: site.city || 'N/A',
+            state: site.state || 'N/A',
+            SiteStatus: site.SiteStatus || 'NO DATA'
           });
           atmIdSet.add(site.ATM_ID);
         }
       });
-      
 
       const enrichedResults = results.map((lho) => {
-        let onlineCount = 0, offlineCount = 0;
+        let onlineCount = 0,
+          offlineCount = 0;
 
         const atmData = lho.atm_ids.map((atm_id) => {
           const siteDetail = allSiteDetails.find((site) => site.ATM_ID === atm_id);
           const status = siteDetail ? siteDetail.SiteStatus : 'NO DATA';
-          if (status === 'ONLINE') onlineCount++;
-          else if (status === 'OFFLINE') offlineCount++;
+          if (status.toLowerCase() === 'online') {
+            onlineCount++;
+          } else if (status.toLowerCase() === 'offline') {
+            offlineCount++;
+          }
 
           return {
             atm_id,
@@ -539,7 +555,6 @@ app.get('/lho-list', async (req, res) => {
     return res.status(500).json({ message: 'Error retrieving data.' });
   }
 });
-
 
 app.post('/securance-site-list/:atmId', async (req, res) => {
   const { atmId } = req.params;

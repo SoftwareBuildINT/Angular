@@ -10,7 +10,7 @@ export class UsermanagementComponent implements OnInit {
   users: any[] = [];
   userRole: string | null = null; // Track user role
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.fetchUsers();
