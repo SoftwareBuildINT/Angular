@@ -85,6 +85,7 @@ export class DashboardComponent implements OnInit {
             offlineCount: lho.offlineCount,
             percentage: parseFloat(lho.percentage.toFixed(2)) // Convert back to a number
           }));
+          this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
           this.filteredLhoList = [...this.lhoList]; // Initialize the filtered list
           this.loading = false; // Set loading to false after data is fetched
         },

@@ -52,7 +52,7 @@
           <h3>Site List</h3>
           <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm" />
           <button class="download-button" (click)="downloadSiteList()">Download</button>
-          <button class="add-button-dark" (click)="openAddModal()">Add New Site</button>
+          <!-- <button class="add-button-dark" (click)="openAddModal()">Add New Site</button> -->
         </div>
       </div>
 
@@ -70,7 +70,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let site of filteredSites()" (click)="navigateToDetails(site)">
+              <tr *ngFor="let site of filteredSites()" class="clickable-row" (click)="navigateToDetails(site)">
                 <td>{{ site.ATM_ID }}</td>
                 <td>{{ site.unitname }}</td>
                 <td>{{ site.city }}</td>

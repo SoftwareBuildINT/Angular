@@ -46,7 +46,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let lho of filteredLhoList" (click)="navigateToSiteDetails(lho)">
+              <tr *ngFor="let lho of filteredLhoList" class="clickable-row" (click)="navigateToSiteDetails(lho)">
                 <td>{{ lho.LHO_Name }}</td>
                 <td>{{ lho.total_locations }}</td>
                 <td>{{ lho.onlineCount }}</td>
