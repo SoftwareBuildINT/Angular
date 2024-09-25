@@ -19,7 +19,11 @@ const connection = mysql.createPool({
   host: '3.7.158.221',
   user: 'admin_buildINT',
   password: 'buildINT@2023$',
-  database: 'H_surveillance'
+  database: 'H_surveillance',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  connectTimeout: 10000 
 });
 
 const port = process.env.PORT || 7558;
