@@ -440,22 +440,21 @@ app.get('/lho-list', async (req, res) => {
 
       const fetchAPIData = async () => {
         try {
-          const [itlApiData, birdsIApiData, newVendorApiData] = await Promise.all([
+          const [itlApiData, birdsIApiData, securanceApiData] = await Promise.all([
             axios.post('https://tom.itlems.com/megaapi/CameraReport', {}, { headers }),
             axios.get('https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'),
             axios.get('https://icms.sspl.securens.in:15101/Lotus/api/AllSiteDetails')
           ]);
-          siteDetails2 = itlApiData.data; 
-          siteDetails = JSON.parse(birdsIApiData.data);
-          
-          // Parse new vendor data
-          // console.log(newVendorApiData.data['data']);
-          const newVendorData = newVendorApiData.data['data'].split('||').map(record => {
+
+          const securanceData = securanceApiData.data['data'].split('||').map(record => {
             const [ATM_ID, unitname, state, city, SiteStatus] = record.split('|');
             return { ATM_ID, unitname, state, city, SiteStatus };
           });
-          siteDetails3 = newVendorData;
-          console.log(siteDetails3);
+
+          siteDetails = JSON.parse(birdsIApiData.data);
+          siteDetails2 = itlApiData.data; 
+          siteDetails3 = securanceData;
+          // console.log(siteDetails3);
         } catch (error) {
           console.error('Error fetching data from APIs:', error);
         }
@@ -578,7 +577,7 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
       let camera_num = config.camera_num.split(',');
       let cameras = camera_num.map((camera) => Number(camera));
 
-      console.log(siteDataToStore);
+      // console.log(siteDataToStore);
 
       // Prepare the function to fetch live view data for each camera
       const fetchLiveViewData = async (camera) => {
