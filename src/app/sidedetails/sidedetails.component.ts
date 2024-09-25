@@ -24,7 +24,7 @@ export class SidedetailsComponent implements OnInit {
   offlineCount: number = 0;
 
   currentPage: number = 1;
-  itemsPerPage: number = 10;
+  itemsPerPage: number = 40;
 
   showModal: boolean = false;
   showSuccessModal: boolean = false;
