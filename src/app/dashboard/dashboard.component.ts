@@ -84,6 +84,9 @@ export class DashboardComponent implements OnInit {
         lho_name: string;
         total_locations: number;
         atm_ids: string[];
+        onlineCount: number;
+        offlineCount: number;
+        percentage: number;
         atm_data: {
           atm_id: string;
           siteName: string;
@@ -100,11 +103,9 @@ export class DashboardComponent implements OnInit {
             LHO_Name: lho.lho_name,
             lho_id: lho.lho_id,
             total_locations: lho.total_locations,
-            onlineCount: lho.atm_data.filter(atm => atm.status === 'Online').length, // Count online ATMs
-            offlineCount: lho.atm_data.filter(atm => atm.status !== 'Online').length, // Count offline ATMs
-            percentage: parseFloat(
-              ((lho.atm_data.filter(atm => atm.status === 'Online').length / lho.total_locations) * 100).toFixed(2)
-            ) // Calculate percentage online
+            onlineCount: lho.onlineCount, // Count online ATMs
+            offlineCount: lho.offlineCount, // Count offline ATMs
+            percentage: lho.percentage// Calculate percentage online
           }));
 
           // Sort LHO list by name

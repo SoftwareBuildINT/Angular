@@ -22,6 +22,7 @@ export class SidedetailsComponent implements OnInit {
   searchTerm: string = '';
   onlineCount: number = 0;
   offlineCount: number = 0;
+  percentage: number = 0; 
 
   currentPage: number = 1;
   itemsPerPage: number = 40;
@@ -69,6 +70,9 @@ export class SidedetailsComponent implements OnInit {
             lho_id: number;
             lho_name: string;
             total_locations: number;
+            onlineCount: number;
+            offlineCount: number;
+            percentage: number;
             atm_data: {
               atm_id: string;
               siteName: string;
@@ -79,7 +83,7 @@ export class SidedetailsComponent implements OnInit {
           }[];
         }) => {
           const lho = response.lhoDetails.find(lho => lho.lho_id === parseInt(this.lhoId!));
-  
+    
           if (lho) {
             // Map the site list from atm_data
             this.siteList = lho.atm_data.map(site => ({
@@ -89,10 +93,12 @@ export class SidedetailsComponent implements OnInit {
               state: site.state,
               SiteStatus: site.status
             }));
-  
-            // Calculate online/offline counts based on atm_data
-            this.onlineCount = this.siteList.filter(site => site.SiteStatus === 'Online').length;
-            this.offlineCount = this.siteList.filter(site => site.SiteStatus !== 'Online').length;
+    
+            // Fetch onlineCount, offlineCount, and percentage directly from the API response
+            this.onlineCount = lho.onlineCount;
+            this.offlineCount = lho.offlineCount;
+            const totalLocations = lho.total_locations;
+            this.percentage = lho.percentage;
   
             // Extract unique statuses and states for dropdown filters
             this.uniqueStatuses = Array.from(new Set(this.siteList.map(site => site.SiteStatus?.toUpperCase())));
@@ -107,6 +113,7 @@ export class SidedetailsComponent implements OnInit {
     }
   }
   
+
 
   // Filtering based on city, state, status, and search term
   filteredSites(): Site[] {
