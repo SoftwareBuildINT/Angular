@@ -450,3 +450,25 @@ h2 {
     background-color: #f9f9f9; // Optional: Add hover effect
   }
 }
+
+.back-button {
+  cursor: pointer; // Change cursor to pointer
+  margin: 10px 0; // Add some margin
+  font-size: 16px; // Adjust font size
+  color: #007bff; // Change text color
+
+  i {
+    margin-right: 5px; // Space between icon and text
+  }
+
+  &:hover {
+    text-decoration: underline; // Underline on hover
+  }
+}
+
+.pagination-info {
+  font-weight: bold;  
+  text-align: right;   
+  margin-right: 10px;
+  color: #000000;  
+}

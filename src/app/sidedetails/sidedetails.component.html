@@ -8,55 +8,17 @@
       <app-sidebar></app-sidebar>
     </div>
     <div class="main">
-      <div class="row">
-        <!-- Card 1 -->
-        <div class="card">
-          <div class="card-body">
-            <div class="card-content">
-              <h4 class="card-title">Total Locations</h4>
-              <div class="card-info">
-                <p class="card-count">{{ siteList.length }}</p>
-                <i class="fas fa-map-marker-alt total-icon"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 2 -->
-        <div class="card">
-          <div class="card-body">
-            <div class="card-content">
-              <h4 class="card-title">Online</h4>
-              <div class="card-info">
-                <p class="card-count">{{ onlineCount }}</p>
-                <i class="fas fa-map-marker-alt online-icon"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Card 3 -->
-        <div class="card">
-          <div class="card-body">
-            <div class="card-content">
-              <h4 class="card-title">Offline</h4>
-              <div class="card-info">
-                <p class="card-count">{{ offlineCount }}</p>
-                <i class="fas fa-map-marker-alt offline-icon"></i>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Back Button -->
+      <div class="back-button" (click)="goBack()">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
       </div>
 
-      <div class="row">
-        <div class="site-list-header">
-          <h3>Site List</h3>
-          <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm" />
-          <button class="download-button" (click)="downloadSiteList()">Download</button>
-          <!-- <button class="add-button-dark" (click)="openAddModal()">Add New Site</button> -->
-        </div>
+      <!-- Pagination Information -->
+      <div class="pagination-info">
+        Page-Item {{ startItem }}-{{ endItem }}
       </div>
 
-      <!-- Table -->
+      <!-- Table with Filtered Data -->
       <div class="row">
         <div class="card1">
           <table class="site-list-table">
@@ -65,8 +27,18 @@
                 <th>ATM ID</th>
                 <th>Site Name</th>
                 <th>City</th>
-                <th>State</th>
-                <th>Site Status</th>
+                <th>
+                  <select id="stateFilter" [(ngModel)]="selectedState" (change)="applyFilters()">
+                    <option value="">States</option>
+                    <option *ngFor="let state of uniqueStates" [value]="state">{{ state }}</option>
+                  </select>
+                </th>
+                <th>
+                  <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="applyFilters()">
+                    <option value="">Statuses</option>
+                    <option *ngFor="let status of uniqueStatuses" [value]="status">{{ status }}</option>
+                  </select>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -89,46 +61,5 @@
         <button (click)="nextPage()" [disabled]="currentPage * itemsPerPage >= siteList.length">Next</button>
       </div>
     </div>
-
-    <!-- Add Site Modal -->
-    <div class="modal" *ngIf="showModal">
-      <div class="modal-content">
-        <span class="close" (click)="closeAddModal()">&times;</span>
-        <h2>Add New Site</h2>
-        <form (ngSubmit)="saveSite()">
-          <div class="form-group">
-            <label for="atmId">ATM ID:</label>
-            <input id="atmId" [(ngModel)]="newSite.ATM_ID" name="atmId" required />
-          </div>
-          <!-- Display error message if it exists -->
-          <div *ngIf="errorMessage" class="error-message">
-            {{ errorMessage }}
-          </div>
-          <div class="button-container">
-            <button type="submit" class="submit-button">Add</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div class="modal" *ngIf="showSuccessModal">
-      <div class="modal-content">
-        <span class="close" (click)="closeSuccessModal()">&times;</span>
-        <div class="modal-body">
-          <i class="fas fa-check-circle success-icon"></i>
-          <h2>ATM ID added successfully!</h2>
-        </div>
-      </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <p>
-        Powered by
-        <span class="build">Build</span>
-        <span class="int">INT</span>
-      </p>
-    </footer>
   </div>
 </div>

@@ -37,12 +37,20 @@ export class SidedetailsComponent implements OnInit {
 
   lhoId: string | null = null;
 
+  // Filters for city, state, and status
+  selectedCity: string = '';
+  selectedState: string = ''; // New filter for state
+  selectedStatus: string = '';
+
+  uniqueStatuses: string[] = []; // For storing unique status options
+  uniqueStates: string[] = []; // For storing unique state options
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private dataService: DataService,
     private http: HttpClient
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.lhoId = this.route.snapshot.queryParams['lho_id'];
@@ -53,8 +61,6 @@ export class SidedetailsComponent implements OnInit {
     if (this.lhoId) {
       this.dataService.getLhoList(this.lhoId).subscribe(
         (data: any) => {
-          // console.log('API response:', data);
-
           if (data && Array.isArray(data)) {
             const lho = data[0];
             this.siteList = lho.atm_data.map(site => ({
@@ -68,11 +74,9 @@ export class SidedetailsComponent implements OnInit {
             this.onlineCount = lho.onlineCount;
             this.offlineCount = lho.offlineCount;
 
-            // console.log('Site list fetched and formatted successfully:', this.siteList);
-            // console.log('Online count:', this.onlineCount);
-            // console.log('Offline count:', this.offlineCount);
-          } else {
-            console.error('Unexpected response format:', data);
+            // Extract unique statuses and states for dropdown filters
+            this.uniqueStatuses = Array.from(new Set(this.siteList.map(site => site.SiteStatus?.toUpperCase())));
+            this.uniqueStates = Array.from(new Set(this.siteList.map(site => site.state)));
           }
         },
         (error) => {
@@ -82,16 +86,40 @@ export class SidedetailsComponent implements OnInit {
     }
   }
 
+  // Filtering based on city, state, status, and search term
   filteredSites(): Site[] {
-    if (!this.searchTerm) {
-      return this.paginatedSites();
+    let filtered = this.siteList;
+
+    // Filter by search term
+    if (this.searchTerm) {
+      const lowercasedSearchTerm = this.searchTerm.toLowerCase();
+      filtered = filtered.filter(site =>
+        site.unitname.toLowerCase().includes(lowercasedSearchTerm) ||
+        site.ATM_ID.toLowerCase().includes(lowercasedSearchTerm)
+      );
     }
-    const lowercasedSearchTerm = this.searchTerm.toLowerCase();
-    const filtered = this.siteList.filter(site =>
-      site.unitname.toLowerCase().includes(lowercasedSearchTerm) ||
-      site.ATM_ID.toLowerCase().includes(lowercasedSearchTerm)
-    );
+
+    // Filter by selected city
+    if (this.selectedCity) {
+      filtered = filtered.filter(site => site.city === this.selectedCity);
+    }
+
+    // Filter by selected state
+    if (this.selectedState) {
+      filtered = filtered.filter(site => site.state === this.selectedState);
+    }
+
+    // Filter by selected status
+    if (this.selectedStatus) {
+      filtered = filtered.filter(site => site.SiteStatus?.toUpperCase() === this.selectedStatus.toUpperCase());
+    }
+
     return this.paginatedSites(filtered);
+  }
+
+  // Function to handle the filters
+  applyFilters(): void {
+    this.filteredSites(); // This call is implicit as the filteredSites() method is called in the template
   }
 
   downloadSiteList(): void {
@@ -114,10 +142,10 @@ export class SidedetailsComponent implements OnInit {
       site.state,
       site.SiteStatus || ''
     ]);
-    
+
     return [
-      header.join(','), // header row
-      ...rows.map(row => row.join(',')) // data rows
+      header.join(','),
+      ...rows.map(row => row.join(',')) 
     ].join('\n');
   }
 
@@ -146,7 +174,7 @@ export class SidedetailsComponent implements OnInit {
   openAddModal(): void {
     this.showModal = true;
   }
-    
+
   closeAddModal(): void {
     this.showModal = false;
   }
@@ -171,19 +199,33 @@ export class SidedetailsComponent implements OnInit {
     this.dataService.addATM(atmData).subscribe(
       (response) => {
         console.log('ATM added successfully:', response);
-        this.fetchSiteList(); 
+        this.fetchSiteList();
         this.closeAddModal();
-        this.errorMessage = null; // Clear any previous error message
-        this.showSuccessModal = true; // Show success modal
+        this.errorMessage = null; 
+        this.showSuccessModal = true; 
       },
       (error) => {
         if (error.status === 409) {
           console.error('Duplicate ATM ID:', error.error.message);
-          this.errorMessage = error.error.message; // Set the error message
+          this.errorMessage = error.error.message; 
         } else {
           console.error('Error adding new ATM:', error);
         }
       }
     );
+  }
+
+   goBack(): void {
+    this.router.navigate(['/dashboard']); 
+  }
+
+  // Pagination details
+  get startItem(): number {
+    return (this.currentPage - 1) * this.itemsPerPage + 1;
+  }
+
+  get endItem(): number {
+    const end = this.currentPage * this.itemsPerPage;
+    return end > this.siteList.length ? this.siteList.length : end;
   }
 }
