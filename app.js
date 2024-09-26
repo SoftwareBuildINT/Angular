@@ -49,13 +49,13 @@ const hashPassword = async (password) => {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const { atmId, cameraId } = req.body;
-    
+
     // Set the path where files will be saved, using atmId and cameraId
     const streamDir = path.join(__dirname, 'src', 'assets', 'streams', atmId, cameraId);
     if (!fs.existsSync(streamDir)) {
       fs.mkdirSync(streamDir, { recursive: true });
     }
-    
+
     cb(null, streamDir); // Save files in the atmId/cameraId directory
   },
   filename: (req, file, cb) => {
@@ -109,7 +109,6 @@ function startRtspToHls(rtspUrl, cameraId, atmId) {
   ffmpegProcess.on('close', (code) => {
     console.log(`[${atmId}][${cameraId}] FFmpeg process exited with code ${code}`);
   });
-
 }
 
 // Function to stop the ffmpeg process
@@ -182,7 +181,7 @@ app.use('/streams', express.static(streamDir));
 app.post('/get-hls-streams', upload.single('hlsFile'), (req, res) => {
   const { atmId, cameraId } = req.body;
   const file = req.file; // Multer saves the file to the directory
-  
+
   if (!file) {
     return res.status(400).send('No file uploaded');
   }
@@ -499,7 +498,9 @@ app.get('/lho-list', async (req, res) => {
       }));
 
       const headers = { 'Content-Type': 'application/json', 'X-Password': 'thePass' };
-      let siteDetails = [], siteDetails2 = [], siteDetails3 = [];
+      let siteDetails = [],
+        siteDetails2 = [],
+        siteDetails3 = [];
 
       const fetchAPIData = async () => {
         try {
@@ -559,14 +560,15 @@ app.get('/lho-list', async (req, res) => {
       });
 
       const enrichedResults = results.map((lho) => {
-        let onlineCount = 0, offlineCount = 0;
+        let onlineCount = 0,
+          offlineCount = 0;
 
         const atmData = lho.atm_ids.map((atm_id) => {
           const siteDetail = allSiteDetails.find((site) => site.ATM_ID === atm_id);
           const status = siteDetail ? siteDetail.SiteStatus : 'NO DATA';
           if (status.toLowerCase() === 'online') {
             onlineCount++;
-          } else if (status.toLowerCase() === 'offline') {
+          } else if (status.toLowerCase() === 'offline' || status.toLowerCase() === 'no data') {
             offlineCount++;
           }
 
