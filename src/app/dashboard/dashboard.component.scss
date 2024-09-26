@@ -46,6 +46,53 @@
     }
   }
 }
+.card {
+  background: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  flex: 1 1 calc(33.333% - 20px); // Responsive width for three cards in a row
+  max-width: calc(33.333% - 20px); // Ensure card does not exceed width
+
+
+.card-body {
+  padding: 15px;
+  text-align: left;
+
+.card-content {
+  .card-info {
+    display: flex;
+    justify-content: space-between; // Align count to the left and icon to the right
+    align-items: center; // Vertically center the items
+    gap: 10px; // Space between count and icon
+    margin-top: 10px;
+
+    .card-count {
+      font-size: 24px;
+      font-weight: bold;
+      color: black; // Adjust color to match theme
+      text-align: left; // Align text to the left
+    }
+
+    i {
+      font-size: 26px; // Adjust icon size
+    }
+
+    .total-icon {
+      color: #243f90; // Blue color for total locations
+    }
+
+    .online-icon {
+      color: #28a745; // Green color for online locations
+    }
+
+    .offline-icon {
+      color: #dc3545; // Red color for offline locations
+    }
+  }
+}
+}
+}
 
 // Main Content Styles
 .main {
@@ -103,7 +150,7 @@
     }
   }
 
-  .card {
+  .card1 {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -144,8 +144,8 @@ export class SidedetailsComponent implements OnInit {
     ]);
 
     return [
-      header.join(','),
-      ...rows.map(row => row.join(',')) 
+      header.join(','), // header row
+      ...rows.map(row => row.join(',')) // data rows
     ].join('\n');
   }
 
@@ -199,24 +199,20 @@ export class SidedetailsComponent implements OnInit {
     this.dataService.addATM(atmData).subscribe(
       (response) => {
         console.log('ATM added successfully:', response);
-        this.fetchSiteList();
+        this.fetchSiteList(); 
         this.closeAddModal();
-        this.errorMessage = null; 
-        this.showSuccessModal = true; 
+        this.errorMessage = null; // Clear any previous error message
+        this.showSuccessModal = true; // Show success modal
       },
       (error) => {
         if (error.status === 409) {
           console.error('Duplicate ATM ID:', error.error.message);
-          this.errorMessage = error.error.message; 
+          this.errorMessage = error.error.message; // Set the error message
         } else {
           console.error('Error adding new ATM:', error);
         }
       }
     );
-  }
-
-   goBack(): void {
-    this.router.navigate(['/dashboard']); 
   }
 
   // Pagination details
@@ -227,5 +223,9 @@ export class SidedetailsComponent implements OnInit {
   get endItem(): number {
     const end = this.currentPage * this.itemsPerPage;
     return end > this.siteList.length ? this.siteList.length : end;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/dashboard']); 
   }
 }

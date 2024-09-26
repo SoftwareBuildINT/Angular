@@ -13,9 +13,57 @@
         <i class="fa fa-arrow-left" aria-hidden="true"></i> Back
       </div>
 
-      <!-- Pagination Information -->
-      <div class="pagination-info">
-        Page-Item {{ startItem }}-{{ endItem }}
+      <div class="row">
+        <!-- Card 1 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="card-content">
+              <h4 class="card-title">Total Locations</h4>
+              <div class="card-info">
+                <p class="card-count">{{ siteList.length }}</p>
+                <i class="fas fa-map-marker-alt total-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="card-content">
+              <h4 class="card-title">Online</h4>
+              <div class="card-info">
+                <p class="card-count">{{ onlineCount }}</p>
+                <i class="fas fa-map-marker-alt online-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="card">
+          <div class="card-body">
+            <div class="card-content">
+              <h4 class="card-title">Offline</h4>
+              <div class="card-info">
+                <p class="card-count">{{ offlineCount }}</p>
+                <i class="fas fa-map-marker-alt offline-icon"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="site-list-header">
+          <h3>Site List</h3>
+          <input type="text" class="search-bar" placeholder="Search..." [(ngModel)]="searchTerm" />
+          <button class="download-button" (click)="downloadSiteList()">Download</button>
+          <!-- <button class="add-button-dark" (click)="openAddModal()">Add New Site</button> -->
+        </div>
+
+
+        <!-- Pagination Information -->
+        <div class="pagination-info">
+          Page-Item {{ startItem }}-{{ endItem }}
+        </div>
       </div>
 
       <!-- Table with Filtered Data -->

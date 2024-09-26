@@ -9,6 +9,44 @@
     <app-sidebar></app-sidebar>
   </div>
   <div class="main">
+    <div class="row">
+      <!-- Card 1 -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-content">
+            <h4 class="card-title">Total Locations</h4>
+            <div class="card-info">
+              <p class="card-count"></p>
+              <i class="fas fa-map-marker-alt total-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-content">
+            <h4 class="card-title">Online</h4>
+            <div class="card-info">
+              <p class="card-count"></p>
+              <i class="fas fa-map-marker-alt online-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="card">
+        <div class="card-body">
+          <div class="card-content">
+            <h4 class="card-title">Offline</h4>
+            <div class="card-info">
+              <p class="card-count"></p>
+              <i class="fas fa-map-marker-alt offline-icon"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="row align-items-center">
       <div class="col heading-title">
         <h4>LHO Wise List</h4>
@@ -31,9 +69,11 @@
       </div>
     </div>
 
+   
+
     <!-- Table content -->
     <div class="row" *ngIf="!loading">
-      <div class="card">
+      <div class="card1">
         <div class="card-body">
           <table class="table table-striped">
             <thead>
