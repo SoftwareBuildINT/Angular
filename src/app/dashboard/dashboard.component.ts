@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('http://localhost:7558/add-lho', { lho_name: this.lhoName })
+      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             alert(response.message || 'LHO saved successfully.');
@@ -74,7 +74,7 @@ export class DashboardComponent implements OnInit {
 
   fetchLhoList() {
     this.loading = true; // Set loading to true while fetching data
-    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('http://localhost:7558/lho-list')
+    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
           this.lhoList = response.map(lho => ({
@@ -85,7 +85,7 @@ export class DashboardComponent implements OnInit {
             offlineCount: lho.offlineCount,
             percentage: parseFloat(lho.percentage.toFixed(2)) // Convert back to a number
           }));
-          this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
+          this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name)); this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
           this.filteredLhoList = [...this.lhoList]; // Initialize the filtered list
           this.loading = false; // Set loading to false after data is fetched
         },
