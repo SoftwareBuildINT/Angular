@@ -60,9 +60,28 @@ export class SidedetailsComponent implements OnInit {
   fetchSiteList(): void {
     if (this.lhoId) {
       this.dataService.getLhoList(this.lhoId).subscribe(
-        (data: any) => {
-          if (data && Array.isArray(data)) {
-            const lho = data[0];
+        (response: {
+          totalLocations: number;
+          totalOnline: number;
+          totalOffline: number;
+          totalPercentage: number;
+          lhoDetails: {
+            lho_id: number;
+            lho_name: string;
+            total_locations: number;
+            atm_data: {
+              atm_id: string;
+              siteName: string;
+              city: string;
+              state: string;
+              status: string;
+            }[];
+          }[];
+        }) => {
+          const lho = response.lhoDetails.find(lho => lho.lho_id === parseInt(this.lhoId!));
+  
+          if (lho) {
+            // Map the site list from atm_data
             this.siteList = lho.atm_data.map(site => ({
               ATM_ID: site.atm_id,
               unitname: site.siteName,
@@ -70,10 +89,11 @@ export class SidedetailsComponent implements OnInit {
               state: site.state,
               SiteStatus: site.status
             }));
-
-            this.onlineCount = lho.onlineCount;
-            this.offlineCount = lho.offlineCount;
-
+  
+            // Calculate online/offline counts based on atm_data
+            this.onlineCount = this.siteList.filter(site => site.SiteStatus === 'Online').length;
+            this.offlineCount = this.siteList.filter(site => site.SiteStatus !== 'Online').length;
+  
             // Extract unique statuses and states for dropdown filters
             this.uniqueStatuses = Array.from(new Set(this.siteList.map(site => site.SiteStatus?.toUpperCase())));
             this.uniqueStates = Array.from(new Set(this.siteList.map(site => site.state)));
@@ -81,10 +101,12 @@ export class SidedetailsComponent implements OnInit {
         },
         (error) => {
           console.error('Error fetching site list:', error);
+          this.errorMessage = 'An error occurred while fetching site data.';
         }
       );
     }
   }
+  
 
   // Filtering based on city, state, status, and search term
   filteredSites(): Site[] {

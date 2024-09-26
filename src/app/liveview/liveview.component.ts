@@ -55,6 +55,46 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
         }
       });
   }
+  // https://sbi-dashboard-hitachi.ifiber.in:7558/api/
+  callAniketApiWithAtmId(atmId: string) {
+    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/aniket-rtsp-link/${atmId}`;
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    this.http.post(apiUrl, { headers })
+      .subscribe({
+        next: (response: any) => {
+          console.log('Aniket API Response:', response);
+          this.apiResponse = response; // Store the API response
+
+          if (response && response.cameras) {
+            // Check if cameras is an object
+            if (typeof response.cameras === 'object' && !Array.isArray(response.cameras)) {
+              // Loop through each camera in the response and call the RTSP to HLS conversion function
+              Object.keys(response.cameras).forEach((cameraKey: string) => {
+                const cameraId = cameraKey;  // Use the key as the camera ID
+                const rtspLink = response.cameras[cameraKey]; // Access the RTSP link
+
+                if (cameraId && rtspLink) {
+                  console.log(`Converting RTSP to HLS for Camera ID: ${cameraId}, RTSP Link: ${rtspLink}`);
+                  this.convertRtspToHls(rtspLink, cameraId); // Call the conversion function
+                } else {
+                  console.error('Invalid camera data, missing cameraId or rtsp link');
+                }
+              });
+            } else {
+              console.error('Cameras data is not in the expected format');
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Error during API call:', error);
+        }
+      });
+  }
+
 
   // Function to check vendor and decide the next steps
   checkVendorAndLoadStreams() {
@@ -77,8 +117,11 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
           if (vendorId === 3) {
             console.log('Vendor is 3, performing RTSP to HLS conversion');
             this.callApiWithAtmId(this.atmId);
-          } else {
-            console.log('Vendor is not 3, directly playing streams');
+          } else if (vendorId === 1) {
+            console.log('Vendor is 1, performing RTSP to HLS conversion');
+            this.callAniketApiWithAtmId(this.atmId);
+          } else if (vendorId === 2) {
+            console.log('Vendor is 2, directly playing streams');
             this.playStreamsDirectly(); // Use the new polling mechanism here
           }
         },
@@ -224,8 +267,8 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // ngAfterViewInit runs after the view has been initialized
   ngAfterViewInit() {
-    if (this.atmId) {
-      this.callApiWithAtmId(this.atmId);
-    }
+    // if (this.atmId) {
+    //   this.callApiWithAtmId(this.atmId);
+    // }
   }
 }

@@ -74,19 +74,44 @@ export class DashboardComponent implements OnInit {
 
   fetchLhoList() {
     this.loading = true; // Set loading to true while fetching data
-    this.http.get<{ lho_id: number; lho_name: string; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[]>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
+    this.http.get<{
+      totalLocations: number;
+      totalOnline: number;
+      totalOffline: number;
+      totalPercentage: number;
+      lhoDetails: {
+        lho_id: number;
+        lho_name: string;
+        total_locations: number;
+        atm_ids: string[];
+        atm_data: {
+          atm_id: string;
+          siteName: string;
+          city: string;
+          state: string;
+          status: string;
+        }[];
+      }[];
+    }>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
-          this.lhoList = response.map(lho => ({
+          // Process the lhoDetails array
+          this.lhoList = response.lhoDetails.map(lho => ({
             LHO_Name: lho.lho_name,
             lho_id: lho.lho_id,
             total_locations: lho.total_locations,
-            onlineCount: lho.onlineCount,
-            offlineCount: lho.offlineCount,
-            percentage: parseFloat(lho.percentage.toFixed(2)) // Convert back to a number
+            onlineCount: lho.atm_data.filter(atm => atm.status === 'Online').length, // Count online ATMs
+            offlineCount: lho.atm_data.filter(atm => atm.status !== 'Online').length, // Count offline ATMs
+            percentage: parseFloat(
+              ((lho.atm_data.filter(atm => atm.status === 'Online').length / lho.total_locations) * 100).toFixed(2)
+            ) // Calculate percentage online
           }));
-          this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name)); this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
-          this.filteredLhoList = [...this.lhoList]; // Initialize the filtered list
+
+          // Sort LHO list by name
+          this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
+
+          // Initialize the filtered list
+          this.filteredLhoList = [...this.lhoList];
           this.loading = false; // Set loading to false after data is fetched
         },
         error: () => {
@@ -95,6 +120,7 @@ export class DashboardComponent implements OnInit {
         }
       });
   }
+
 
   securanceLogin() {
     const loginPayload = {

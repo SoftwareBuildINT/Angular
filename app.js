@@ -532,7 +532,7 @@ app.get('/lho-list', async (req, res) => {
         if (!atmIdSet.has(site.AtmID)) {
           const lastCheckedTime = new Date(site.LastChecked);
           const currentTime = new Date();
-          const timeDifference = (currentTime - lastCheckedTime) / 60000; // in minutes
+          const timeDifference = (currentTime - lastCheckedTime) / 60000;
           const status = timeDifference <= 15 ? 'ONLINE' : 'OFFLINE';
 
           allSiteDetails.push({
@@ -559,6 +559,10 @@ app.get('/lho-list', async (req, res) => {
         }
       });
 
+      let totalLocations = 0;
+      let totalOnline = 0;
+      let totalOffline = 0;
+
       const enrichedResults = results.map((lho) => {
         let onlineCount = 0,
           offlineCount = 0;
@@ -584,6 +588,10 @@ app.get('/lho-list', async (req, res) => {
         const totalATMs = onlineCount + offlineCount;
         const percentage = totalATMs ? ((onlineCount / totalATMs) * 100).toFixed(2) : '0.00';
 
+        totalLocations += lho.total_locations;
+        totalOnline += onlineCount;
+        totalOffline += offlineCount;
+
         return {
           ...lho,
           onlineCount,
@@ -593,7 +601,15 @@ app.get('/lho-list', async (req, res) => {
         };
       });
 
-      return res.status(200).json(enrichedResults);
+      const overallPercentage = totalLocations ? ((totalOnline / (totalOnline + totalOffline)) * 100).toFixed(2) : '0.00';
+
+      return res.status(200).json({
+        totalLocations,
+        totalOnline,
+        totalOffline,
+        totalPercentage: parseFloat(overallPercentage),
+        lhoDetails: enrichedResults
+      });
     });
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -687,6 +703,59 @@ app.post('/securance-site-list/:atmId', async (req, res) => {
     }
   } catch (error) {
     console.error('Error in /securance-site-list:', error.message);
+    res.status(500).json({
+      message: 'Internal Server Error',
+      error: error.message
+    });
+  }
+});
+
+app.post('/aniket-rtsp-link/:atmId', async (req, res) => {
+  console.log('inside aniket-rtsp-link');
+  const { atmId } = req.params;
+
+  try {
+    const fetchAPIData = async () => {
+      try {
+        const response = await axios({
+          method: 'get',
+          url: `https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/GetLiveStreamURL/${atmId}`
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Error fetching data from API:', error);
+        throw new Error('Failed to fetch data from external API');
+      }
+    };
+
+    const siteDetails = await fetchAPIData();
+
+    // Parse the response string to a JSON object
+    const parsedData = JSON.parse(siteDetails);
+
+    if (parsedData && parsedData.length > 0) {
+      const data = parsedData[0];
+      const atmId = data.ATM_ID;
+
+      const cameras = Object.keys(data)
+        .filter((key) => key.toLowerCase().startsWith('camera'))
+        .reduce((obj, key, index) => {
+          // Replace camera key format to 'camera_x'
+          obj[`camera_${index + 1}`] = data[key];
+          return obj;
+        }, {});
+
+      res.status(200).json({
+        siteId: atmId,
+        cameras
+      });
+    } else {
+      res.status(404).json({
+        message: 'No data found for the specified ATM ID'
+      });
+    }
+  } catch (error) {
+    console.error('Error in /aniket-rtsp-link:', error.message);
     res.status(500).json({
       message: 'Internal Server Error',
       error: error.message
