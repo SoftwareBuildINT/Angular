@@ -10,24 +10,31 @@ import { HttpClient } from '@angular/common/http';
 export class DashboardComponent implements OnInit {
   showModal = false;
   lhoName = '';
-  searchTerm: string = ''; // Holds the search input
+  searchTerm: string = '';
   lhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
   filteredLhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
-  userRole: string | null = null; // Track user role
-  loading: boolean = true; // Track loading state
+  userRole: string | null = null;
+
+  // Variables for the card data
+  totalLocations: number = 0;
+  totalOnline: number = 0;
+  totalOffline: number = 0;
+  totalPercentage: number = 0;
+  
+  loading: boolean = true;
 
   constructor(private router: Router, private http: HttpClient) { }
 
   ngOnInit() {
-    this.fetchLhoList(); // Fetch LHO data on component initialization
-    this.getUserRole(); // Fetch the user role from local storage
+    this.fetchLhoList();
+    this.getUserRole();
     this.securanceLogin();
   }
 
   getUserRole(): void {
-    this.userRole = localStorage.getItem('roleId'); // Fetch the role stored as a string
+    this.userRole = localStorage.getItem('roleId');
     if (!this.userRole) {
-      console.error('Role ID is not set or not recognized:', this.userRole); // Log for debugging
+      console.error('Role ID is not set or not recognized:', this.userRole);
     }
   }
 
@@ -46,7 +53,7 @@ export class DashboardComponent implements OnInit {
   }
 
   clearInput() {
-    this.lhoName = ''; // Clear the input field
+    this.lhoName = '';
   }
 
   saveLho() {
@@ -56,8 +63,8 @@ export class DashboardComponent implements OnInit {
         .subscribe({
           next: (response: any) => {
             alert(response.message || 'LHO saved successfully.');
-            this.closeModal(); // Close the modal after saving
-            this.fetchLhoList(); // Refresh the LHO list after saving
+            this.closeModal();
+            this.fetchLhoList();
           },
           error: (error) => {
             if (error.status === 409) {
@@ -73,7 +80,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchLhoList() {
-    this.loading = true; // Set loading to true while fetching data
+    this.loading = true;
     this.http.get<{
       totalLocations: number;
       totalOnline: number;
@@ -98,58 +105,54 @@ export class DashboardComponent implements OnInit {
     }>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
-          // Process the lhoDetails array
+        
+          this.totalLocations = response.totalLocations;
+          this.totalOnline = response.totalOnline;
+          this.totalOffline = response.totalOffline;
+          this.totalPercentage = response.totalPercentage;
+
+          // Process LHO list
           this.lhoList = response.lhoDetails.map(lho => ({
             LHO_Name: lho.lho_name,
             lho_id: lho.lho_id,
             total_locations: lho.total_locations,
-            onlineCount: lho.onlineCount, // Count online ATMs
-            offlineCount: lho.offlineCount, // Count offline ATMs
-            percentage: lho.percentage// Calculate percentage online
+            onlineCount: lho.onlineCount,
+            offlineCount: lho.offlineCount,
+            percentage: lho.percentage
           }));
 
-          // Sort LHO list by name
+         
           this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
-
-          // Initialize the filtered list
           this.filteredLhoList = [...this.lhoList];
-          this.loading = false; // Set loading to false after data is fetched
+          this.loading = false;
         },
         error: () => {
           alert('An error occurred while fetching the LHO list.');
-          this.loading = false; // Set loading to false if an error occurs
+          this.loading = false;
         }
       });
   }
 
-
-  securanceLogin() {
-    const loginPayload = {
-      email: 'Hitachi.SBI@securens.in',
-      password: 'E#K89GHp$boss'
-    };
-
-    this.http.post<{ token: string; services: string }>('https://apip.sspl.securens.in:14333/api/login', loginPayload)
-      .subscribe({
-        next: (response) => {
-          // Store the token and services in localStorage
-          localStorage.setItem('authToken', response.token);
-          localStorage.setItem('services', response.services);
-
-          // console.log("Securance token:", localStorage.getItem('authToken'));
-          console.log("Services:", localStorage.getItem('services'));
-        },
-        error: (error) => {
-          console.error('Login error:', error);
-          alert('Login failed. Please check your credentials.');
-        }
-      });
-  }
-
-  // Method to filter the LHO list based on search input
   filterLhoList() {
     this.filteredLhoList = this.lhoList.filter(lho =>
       lho.LHO_Name.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
+  }
+
+  securanceLogin() {
+    const data = {
+      securance_id: localStorage.getItem('securanceId'),
+      email: localStorage.getItem('email'),
+      role_id: localStorage.getItem('roleId')
+    };
+    this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/securance-login', data)
+      .subscribe({
+        next: (response: any) => {
+          console.log('Securance login successful:', response);
+        },
+        error: (error) => {
+          console.error('Securance login error:', error);
+        }
+      });
   }
 }
