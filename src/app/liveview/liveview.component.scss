@@ -30,38 +30,40 @@
 // Row styles for camera views
 .row {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px; // Adjust spacing between rows
+  justify-content: center; // Center the content horizontally
+  margin-bottom: 5px;
 }
 
-// Camera view styles
+// Camera view styles - make sure there's only one camera view
 .camera-view {
-  width: calc(50% - 10px); // Adjust width to fit two per row with spacing
+  width: 80%; // Increase the width of the camera view to make it larger
   box-sizing: border-box;
-  margin-bottom: 5px; // Space between camera views
+  margin-bottom: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; // Center content within the camera view
 }
 
-// Camera frame styles
+// Camera frame styles - adjust the size of the video container
 .camera-frame {
-  background-color: black; // Default black background before the video loads
+  background-color: black;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  position: relative; // To position the spinner correctly
-  width: 350px;
-  height: 280px;
+  position: relative;
+  width: 600px; // Increase the width
+  height: 400px; // Increase the height
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-// Video element styles
+// Video element styles - make video responsive within the container
 video {
-  width: 100%; // Make video responsive within its container
-  height: 100%; // Make video responsive within its container
+  width: 100%; // Make video responsive to the container's new size
+  height: 100%; 
   object-fit: cover;
 }
-
 // Loading spinner styles
 .loading-spinner {
   position: absolute;
