@@ -29,7 +29,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Function to call API with atmId
   callApiWithAtmId(atmId: string) {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/securance-site-list/${atmId}`;
+    const apiUrl = `http://localhost:7558/securance-site-list/${atmId}`;
 
     const token = localStorage.getItem('authToken');
     const services = localStorage.getItem('services');
@@ -47,7 +47,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
       .subscribe({
         next: (response: any) => {
           console.log('API Response:', response);
-          this.apiResponse = response; // Store the response data for later use
+          this.apiResponse = response;
           this.convertAndPlayStreams();
         },
         error: (error) => {
@@ -55,9 +55,9 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
         }
       });
   }
-  // https://sbi-dashboard-hitachi.ifiber.in:7558/api/
+  // http://localhost:7558/
   callAniketApiWithAtmId(atmId: string) {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/aniket-rtsp-link/${atmId}`;
+    const apiUrl = `http://localhost:7558/aniket-rtsp-link/${atmId}`;
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
@@ -98,7 +98,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Function to check vendor and decide the next steps
   checkVendorAndLoadStreams() {
-    const vendorApiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/atm-vendor`;
+    const vendorApiUrl = `http://localhost:7558/atm-vendor`;
 
     // Create the payload with atmId in the body
     const payload = { atmId: this.atmId };
@@ -157,7 +157,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
     });
 
     // Check if the file exists by calling a backend endpoint
-    const checkUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/check-file-exists?path=${filePath}`; // Backend route to check file existence
+    const checkUrl = `http://localhost:7558/check-file-exists?path=${filePath}`; // Backend route to check file existence
 
     this.http.get(checkUrl, { headers })
       .subscribe({
@@ -201,7 +201,7 @@ export class LiveviewComponent implements AfterViewInit, OnInit {
 
   // Convert RTSP to HLS using API and load into video elements
   convertRtspToHls(rtspUrl: string, cameraId: string) {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/convert-rtsp`;
+    const apiUrl = `http://localhost:7558/convert-rtsp`;
 
     const payload = {
       rtspUrl: rtspUrl,

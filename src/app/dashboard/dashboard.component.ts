@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit {
   totalOnline: number = 0;
   totalOffline: number = 0;
   totalPercentage: number = 0;
-  
+
   loading: boolean = true;
 
   constructor(private router: Router, private http: HttpClient) { }
@@ -59,7 +59,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
+      this.http.post('http://localhost:7558/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             alert(response.message || 'LHO saved successfully.');
@@ -102,10 +102,10 @@ export class DashboardComponent implements OnInit {
           status: string;
         }[];
       }[];
-    }>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
+    }>('http://localhost:7558/lho-list')
       .subscribe({
         next: (response) => {
-        
+
           this.totalLocations = response.totalLocations;
           this.totalOnline = response.totalOnline;
           this.totalOffline = response.totalOffline;
@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
             percentage: lho.percentage
           }));
 
-         
+
           this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
           this.filteredLhoList = [...this.lhoList];
           this.loading = false;
@@ -140,18 +140,24 @@ export class DashboardComponent implements OnInit {
   }
 
   securanceLogin() {
-    const data = {
-      securance_id: localStorage.getItem('securanceId'),
-      email: localStorage.getItem('email'),
-      role_id: localStorage.getItem('roleId')
+    const loginPayload = {
+      email: 'Hitachi.SBI@securens.in',
+      password: 'E#K89GHp$boss'
     };
-    this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/securance-login', data)
+
+    this.http.post<{ token: string; services: string }>('https://apip.sspl.securens.in:14333/api/login', loginPayload)
       .subscribe({
-        next: (response: any) => {
-          console.log('Securance login successful:', response);
+        next: (response) => {
+          // Store the token and services in localStorage
+          localStorage.setItem('authToken', response.token);
+          localStorage.setItem('services', response.services);
+
+          // console.log("Securance token:", localStorage.getItem('authToken'));
+          console.log("Services:", localStorage.getItem('services'));
         },
         error: (error) => {
-          console.error('Securance login error:', error);
+          console.error('Login error:', error);
+          alert('Login failed. Please check your credentials.');
         }
       });
   }

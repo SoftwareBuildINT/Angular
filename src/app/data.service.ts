@@ -8,7 +8,7 @@ import { catchError, map } from 'rxjs/operators';
 })
 
 export class DataService {
-  private loginUrl = 'https://sbi-dashboard-hitachi.ifiber.in:7558/api/login'; // Login API URL
+  private loginUrl = 'http://localhost:7558/login'; // Login API URL
   private siteListUrl = 'https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll'; // Site list API URL
   private dashboardUrl = 'http://localhost:5000/dashboard'; // Dashboard API URL
 
@@ -45,13 +45,13 @@ export class DataService {
   }
 
   getLhoList(lhoId: string): Observable<any> {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list?lho_id=${lhoId}`;
+    const apiUrl = `http://localhost:7558/lho-list?lho_id=${lhoId}`;
     return this.http.get(apiUrl, { responseType: 'json' });
   }
 
   // Method to add a new ATM
   addATM(atmData: { atmId: string; lho_id: string }): Observable<any> {
-    const apiUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-atm`;
+    const apiUrl = `http://localhost:7558/add-atm`;
     return this.http.post(apiUrl, atmData, { responseType: 'json' });
   }
 

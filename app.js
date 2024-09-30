@@ -620,7 +620,7 @@ app.get('/lho-list', async (req, res) => {
 app.post('/securance-site-list/:atmId', async (req, res) => {
   const { atmId } = req.params;
   const { services, token } = req.body;
-
+// http://localhost:7558/
   try {
     // Fetch external API data
     const fetchAPIData = async () => {
