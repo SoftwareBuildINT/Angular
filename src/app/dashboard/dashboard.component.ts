@@ -59,7 +59,7 @@ export class DashboardComponent implements OnInit {
   saveLho() {
     if (this.lhoName.trim()) {
       console.log('LHO Name:', this.lhoName);
-      this.http.post('http://localhost:7558/add-lho', { lho_name: this.lhoName })
+      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             alert(response.message || 'LHO saved successfully.');
@@ -102,7 +102,7 @@ export class DashboardComponent implements OnInit {
           status: string;
         }[];
       }[];
-    }>('http://localhost:7558/lho-list')
+    }>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
 

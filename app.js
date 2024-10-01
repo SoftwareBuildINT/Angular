@@ -86,9 +86,9 @@ function startRtspToHls(rtspUrl, cameraId, atmId) {
     '-f',
     'hls', // Output format: HLS
     '-hls_time',
-    '2', // Segment duration (in seconds)
+    '5', // Segment duration (in seconds)
     '-hls_list_size',
-    '5', // Number of segments in the playlist
+    '3', // Number of segments in the playlist
     '-hls_flags',
     'delete_segments', // Remove old segments
     path.join(outputDir, 'output.m3u8') // Output HLS file path
@@ -114,10 +114,16 @@ function startRtspToHls(rtspUrl, cameraId, atmId) {
 // Function to stop the ffmpeg process
 function stopFfmpeg() {
   if (ffmpegProcess) {
-    ffmpegProcess.kill('SIGINT'); // Gracefully stop the process
+    ffmpegProcess.kill('SIGINT');
     console.log('ffmpeg process terminated');
   }
 }
+
+app.get('/stop-ffmpeg', function (req, res) {
+  console.log('Checking and stopping ffmpeg');
+  stopFfmpeg();
+  return res.status(200).send('success');
+});
 
 app.get('/check-file-exists', (req, res) => {
   const filePath = path.join(__dirname, req.query.path); // Construct the full file path
@@ -173,6 +179,7 @@ app.post('/convert-rtsp', (req, res) => {
   // Return the HLS stream URL to the client
   const hlsUrl = `https://sbi-dashboard-hitachi.ifiber.in:7558/streams/${atmId}/${cameraId}/output.m3u8`;
   res.json({ hlsUrl });
+  return hlsUrl;
 });
 
 // Serve static HLS streams
@@ -617,10 +624,230 @@ app.get('/lho-list', async (req, res) => {
   }
 });
 
+app.post('/live-view-links', async (req, res) => {
+  const { atmId } = req.query;
+
+  try {
+    const vendorQuery = `SELECT vendor FROM H_surveillance.atm_list WHERE atm_id = ?;`;
+
+    connection.query(vendorQuery, [atmId], async (err, result) => {
+      if (err) {
+        console.error('Error fetching data from MySQL:', err);
+        return res.status(500).json({ message: 'Error fetching data from the database.' });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'Vendor not found in the database.' });
+      }
+
+      const vendorId = result[0].vendor;
+      console.log('Vendor ID:', vendorId);
+
+      const generateHLS = async (payload) => {
+        try {
+          const response = await axios({
+            method: 'post',
+            url: `http://localhost:7558/convert-rtsp`,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            data: payload
+          });
+          return response;
+        } catch (error) {
+          console.error(`Error: ${error.message}`);
+          throw new Error(`Error: ${error.message}`);
+        }
+      };
+
+      if (vendorId === 3) {
+        try {
+          const securanceLogin = `https://apip.sspl.securens.in:14333/api/login`;
+          const payload = {
+            email: 'Hitachi.SBI@securens.in',
+            password: 'E#K89GHp$boss'
+          };
+
+          const headers = {
+            'Content-Type': 'application/json'
+          };
+
+          const securanceResponse = await axios.post(securanceLogin, payload, { headers });
+          const token = securanceResponse.data.token;
+          const services = securanceResponse.data.services[0];
+          console.log(`token: ${token} services: ${services}`);
+          const securanceAllSites = async () => {
+            try {
+              const response = await axios({
+                method: 'post',
+                url: `https://apip.sspl.securens.in:14333/api/v1/siteList?services=${services}`,
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              return response.data.data;
+            } catch (error) {
+              console.error('Error fetching data from API:', error);
+              throw new Error('Failed to fetch data from external API');
+            }
+          };
+
+          const siteDetails = await securanceAllSites();
+          const matchedSite = siteDetails.find((site) => site.siteId === atmId);
+          // console.log(matchedSite);
+          if (matchedSite) {
+            const config = matchedSite.site_config[0];
+            const siteDataToStore = {
+              siteId: matchedSite.siteId,
+              dvr_user_id: config.dvr_user_id,
+              dvr_password: config.dvr_password,
+              dvr_manufacturer: config.dvr_manufacturer,
+              siteIp: config.dvr_ip,
+              camera_num: config.camera_num.split(',').length,
+              rtsp_port: config.rtsp_port
+            };
+
+            let camera_num = config.camera_num.split(',');
+            let cameras = Number(camera_num[0]);
+            console.log(cameras);
+            // console.log(siteDataToStore);
+
+            // Prepare the function to fetch live view data for each camera
+            const fetchLiveViewData = async (camera) => {
+              try {
+                const response = await axios({
+                  method: 'post',
+                  url: `https://apip.sspl.securens.in:14333/api/v1/livestreaming?dvr_user_id=${encodeURIComponent(config.dvr_user_id)}&dvr_password=${encodeURIComponent(config.dvr_password)}&dvr_manufacturer=${encodeURIComponent(config.dvr_manufacturer)}&siteIp=${encodeURIComponent(config.dvr_ip)}&camera_num=${encodeURIComponent(camera)}&rtsp_port=${encodeURIComponent(config.rtsp_port)}`,
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                  }
+                });
+                return response.data.data;
+              } catch (error) {
+                console.error(`Error fetching live view data for camera ${camera}:`, error.response ? error.response.data : error.message);
+                throw new Error(`Failed to fetch live view data for camera ${camera}`);
+              }
+            };
+
+            // Loop through each camera and fetch live view data
+            const liveViewLink = await fetchLiveViewData(cameras);
+            // const liveViewLinks = await Promise.all(liveViewLinksPromises);
+
+            // Build dynamic response object
+            const responseObj = {
+              // vendor: vendorId,
+              siteId: siteDataToStore.siteId,
+              camera_1: liveViewLink.rtsp
+            };
+
+            const cameraKey = Object.keys(responseObj).find((key) => key.startsWith('camera_'));
+            const rtspUrl = responseObj[cameraKey];
+            const cameraId = cameraKey;
+
+            const payload = {
+              atmId: responseObj.siteId,
+              cameraId: cameraId,
+              rtspUrl: rtspUrl
+            };
+
+            const convertHLS = await generateHLS(payload);
+            console.log(`Converting to hls: ${convertHLS}`);
+
+            console.log('Live View Links successfully fetched for all cameras');
+
+            res.status(200).json(responseObj);
+          } else {
+            res.status(404).json({
+              message: 'ATM ID not found in external API data'
+            });
+          }
+          // return res.status(200).json({ vendor: vendorId, token, services, matchedSite: matchedSite });
+        } catch (tokenError) {
+          console.error('Error fetching token from securance:', tokenError);
+          return res.status(500).json({ message: 'Error fetching token from securance.' });
+        }
+      } else if (vendorId === 1) {
+        try {
+          const aniketAPIData = async () => {
+            try {
+              const response = await axios({
+                method: 'get',
+                url: `https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/GetLiveStreamURL/${atmId}`
+              });
+              return response.data;
+            } catch (error) {
+              console.error('Error fetching data from API:', error);
+              throw new Error('Failed to fetch data from external API');
+            }
+          };
+      
+          const siteDetails = await aniketAPIData();
+      
+          // Parse the response string to a JSON object
+          const parsedData = JSON.parse(siteDetails);
+          // console.log(parsedData);
+      
+          if (parsedData && parsedData.length > 0) {
+            const data = parsedData[0];
+            const atmId = data.ATM_ID;
+      
+            const cameras = Object.keys(data)
+              .filter((key) => key.toLowerCase().startsWith('camera1'))
+              .reduce((obj, key, index) => {
+                // Replace camera key format to 'camera_x'
+                obj[`camera_${index + 1}`] = data[key];
+                return obj;
+              }, {});
+      
+            const responseObj = {
+              atmId: atmId,
+              ...cameras
+            } 
+            console.log(responseObj);
+
+            const cameraKey = Object.keys(responseObj).find((key) => key.startsWith('camera_'));
+            const rtspUrl = responseObj[cameraKey];
+            const cameraId = cameraKey;
+
+            const payload = {
+              atmId: atmId,
+              cameraId: cameraId,
+              rtspUrl: rtspUrl
+            };
+
+            console.log(payload);
+
+            const convertHLS = await generateHLS(payload);
+            console.log(`Converting to hls: ${convertHLS}`);
+            res.status(200).json(responseObj);
+            
+          } else {
+            res.status(404).json({
+              message: 'No data found for the specified ATM ID'
+            });
+          }
+        } catch (error) {
+          console.error('Error in Aniket live view link api:', error.message);
+          res.status(500).json({
+            message: 'Internal Server Error',
+            error: error.message
+          });
+        }
+      }else{
+        return res.status(200).json({ vendor: vendorId });
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return res.status(500).json({ message: 'Error retrieving data.' });
+  }
+});
+
 app.post('/securance-site-list/:atmId', async (req, res) => {
   const { atmId } = req.params;
   const { services, token } = req.body;
-// http://localhost:7558/
+
   try {
     // Fetch external API data
     const fetchAPIData = async () => {
