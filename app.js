@@ -256,7 +256,7 @@ app.post('/login', async (req, res) => {
 
   try {
     // Fetch user details from the database based on the provided email
-    connection.query('SELECT * FROM users WHERE email_id = ?', [EmailId], async (err, results) => {
+    connection.query('SELECT * FROM users WHERE email_id = ? AND is_active = 1', [EmailId], async (err, results) => {
       if (err) {
         console.error('Database query error:', err);
         return res.status(500).json({ error: 'Internal server error' });
@@ -462,8 +462,21 @@ app.get('/LHO', (req, res) => {
   });
 });
 
+app.get('/atm-list', (req, res) => {
+  const query = `SELECT atm_id FROM H_surveillance.atm_list;`;
+
+  connection.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching data from MySQL:', err);
+      return res.status(500).json({ message: 'Error retrieving data from the database.' });
+    } else {
+      res.status(200).json({ atm_list: results.map((row) => row.atm_id) });
+    }
+  });
+});
+
 app.get('/lho-list', async (req, res) => {
-  const lho_id = req.query.lho_id;
+  const { lho_id, atm_id } = req.query;
 
   try {
     await new Promise((resolve, reject) => {
@@ -477,23 +490,41 @@ app.get('/lho-list', async (req, res) => {
       });
     });
 
-    // Second query: Fetch the LHO list with ATM IDs
-    const query = lho_id
-      ? `
+    let query;
+    let queryParams;
+
+    if (lho_id) {
+      query = `
       SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
       GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
       FROM H_surveillance.LHO_list l
       JOIN atm_list a ON l.lho_id = a.lho_id
       WHERE l.lho_id = ?
-      GROUP BY l.lho_id, l.lho_name;`
-      : `
+      GROUP BY l.lho_id, l.lho_name;
+      `;
+      queryParams = [lho_id];
+    } else if (atm_id) {
+      query = `
+      SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
+      GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
+      FROM H_surveillance.LHO_list l
+      JOIN atm_list a ON l.lho_id = a.lho_id
+      WHERE a.atm_id = ?
+      GROUP BY l.lho_id, l.lho_name;
+      `;
+      queryParams = [atm_id];
+    } else {
+      query = `
       SELECT l.lho_id, l.lho_name, COUNT(a.atm_id) AS total_locations, 
       GROUP_CONCAT(a.atm_id ORDER BY a.atm_id SEPARATOR ',') AS atm_ids
       FROM H_surveillance.LHO_list l
       LEFT JOIN atm_list a ON l.lho_id = a.lho_id
-      GROUP BY l.lho_id, l.lho_name;`;
+      GROUP BY l.lho_id, l.lho_name;
+      `;
+      queryParams = [];
+    }
 
-    connection.query(query, [lho_id], async (err, results) => {
+    connection.query(query, queryParams, async (err, results) => {
       if (err) {
         console.error('Error fetching data from MySQL:', err);
         return res.status(500).json({ message: 'Error retrieving data from the database.' });
@@ -758,6 +789,7 @@ app.post('/live-view-links', async (req, res) => {
 
             res.status(200).json(responseObj);
           } else {
+            console.log('ATM ID not found in external API data');
             res.status(404).json({
               message: 'ATM ID not found in external API data'
             });
@@ -781,17 +813,17 @@ app.post('/live-view-links', async (req, res) => {
               throw new Error('Failed to fetch data from external API');
             }
           };
-      
+
           const siteDetails = await aniketAPIData();
-      
+
           // Parse the response string to a JSON object
           const parsedData = JSON.parse(siteDetails);
           // console.log(parsedData);
-      
+
           if (parsedData && parsedData.length > 0) {
             const data = parsedData[0];
             const atmId = data.ATM_ID;
-      
+
             const cameras = Object.keys(data)
               .filter((key) => key.toLowerCase().startsWith('camera1'))
               .reduce((obj, key, index) => {
@@ -799,11 +831,11 @@ app.post('/live-view-links', async (req, res) => {
                 obj[`camera_${index + 1}`] = data[key];
                 return obj;
               }, {});
-      
+
             const responseObj = {
               atmId: atmId,
               ...cameras
-            } 
+            };
             console.log(responseObj);
 
             const cameraKey = Object.keys(responseObj).find((key) => key.startsWith('camera_'));
@@ -821,7 +853,6 @@ app.post('/live-view-links', async (req, res) => {
             const convertHLS = await generateHLS(payload);
             console.log(`Converting to hls: ${convertHLS}`);
             res.status(200).json(responseObj);
-            
           } else {
             res.status(404).json({
               message: 'No data found for the specified ATM ID'
@@ -834,7 +865,7 @@ app.post('/live-view-links', async (req, res) => {
             error: error.message
           });
         }
-      }else{
+      } else {
         return res.status(200).json({ vendor: vendorId });
       }
     });
