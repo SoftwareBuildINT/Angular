@@ -902,7 +902,7 @@ app.post('/live-view-links', async (req, res) => {
               username: 'admin',
               password: ''
             };
-            
+
             const response = await axios.post('http://stream.ssplcms.com:51002/api/start', payload, {
               headers: { 'Content-Type': 'application/json' }
             });
