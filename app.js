@@ -865,8 +865,56 @@ app.post('/live-view-links', async (req, res) => {
             error: error.message
           });
         }
-      } else {
-        return res.status(200).json({ vendor: vendorId });
+      } else if (vendorId === 2) {
+        try {
+          const itlApiData = await axios.post(
+            'https://tom.itlems.com/megaapi/CameraReport',
+            {},
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Password': 'thePass'
+              }
+            }
+          );
+
+          const itlSites = itlApiData.data;
+          const atmIdSet = new Set();
+          const siteDetails = [];
+
+          itlSites.forEach((site) => {
+            if (!atmIdSet.has(site.AtmID)) {
+              siteDetails.push({
+                ATM_ID: site.AtmID,
+                cameraId: site.CameraID || 'N/A'
+              });
+              atmIdSet.add(site.AtmID);
+            }
+          });
+
+          const matchedSite = siteDetails.find((site) => site.ATM_ID === atmId);
+
+          console.log(matchedSite);
+
+          if (matchedSite) {
+            const payload = {
+              camId: matchedSite.cameraId,
+              username: 'admin',
+              password: ''
+            };
+            
+            const response = await axios.post('http://stream.ssplcms.com:51002/api/start', payload, {
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+            res.status(200).json({ liveViewLink: response.data.url });
+          } else {
+            res.status(404).json({ message: 'ATM ID not found in ITL API data' });
+          }
+        } catch (error) {
+          console.error('Error fetching data from ITL API:', error.response.data);
+          res.status(500).json({ message: 'Error fetching data from ITL API.' });
+        }
       }
     });
   } catch (error) {
