@@ -11,24 +11,25 @@ export class DashboardComponent implements OnInit {
   showModal = false;
   lhoName = '';
   searchTerm: string = '';
-  lhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
-  filteredLhoList: { LHO_Name: string; lho_id: number; total_locations: number; onlineCount: number; offlineCount: number; percentage: number; }[] = [];
+  lhoList: any[] = [];
+  filteredLhoList: any[] = [];
+  atmList: string[] = []; // Array to store ATM list for suggestions
+  filteredAtmList: string[] = [];
   userRole: string | null = null;
 
-  // Variables for the card data
   totalLocations: number = 0;
   totalOnline: number = 0;
   totalOffline: number = 0;
   totalPercentage: number = 0;
-
   loading: boolean = true;
 
-  constructor(private router: Router, private http: HttpClient) { }
+  constructor(private router: Router, private http: HttpClient) {}
 
   ngOnInit() {
     this.fetchLhoList();
     this.getUserRole();
     this.securanceLogin();
+    this.fetchAtmList(); 
   }
 
   getUserRole(): void {
@@ -36,6 +37,36 @@ export class DashboardComponent implements OnInit {
     if (!this.userRole) {
       console.error('Role ID is not set or not recognized:', this.userRole);
     }
+  }
+
+  // Fetch the ATM list for autocomplete suggestions
+  fetchAtmList(): void {
+    this.http.get<{ atm_list: string[] }>('http://localhost:7558/atm-list')
+      .subscribe({
+        next: (response) => {
+          //console.log('ATM list:', response);
+          this.atmList = response.atm_list;
+        },
+        error: (error) => {
+          console.error('Error fetching ATM list:', error);
+        }
+      });
+  }
+
+  // Filter the ATM list based on the user's search term
+  filterAtmList(): void {
+    if (this.searchTerm) {
+      this.filteredAtmList = this.atmList.filter(atm =>
+        atm.toLowerCase().includes(this.searchTerm.toLowerCase())
+      );
+    } else {
+      this.filteredAtmList = [];
+    }
+  }
+
+  selectAtm(atmId: string) {
+    this.searchTerm = atmId; 
+    this.router.navigate(['/liveview'], { queryParams: { atm_id: atmId } });
   }
 
   navigateToSiteDetails(lho: { LHO_Name: string; lho_id: number }) {
@@ -58,7 +89,6 @@ export class DashboardComponent implements OnInit {
 
   saveLho() {
     if (this.lhoName.trim()) {
-      console.log('LHO Name:', this.lhoName);
       this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
@@ -86,32 +116,15 @@ export class DashboardComponent implements OnInit {
       totalOnline: number;
       totalOffline: number;
       totalPercentage: number;
-      lhoDetails: {
-        lho_id: number;
-        lho_name: string;
-        total_locations: number;
-        atm_ids: string[];
-        onlineCount: number;
-        offlineCount: number;
-        percentage: number;
-        atm_data: {
-          atm_id: string;
-          siteName: string;
-          city: string;
-          state: string;
-          status: string;
-        }[];
-      }[];
+      lhoDetails: any[];
     }>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
       .subscribe({
         next: (response) => {
-
           this.totalLocations = response.totalLocations;
           this.totalOnline = response.totalOnline;
           this.totalOffline = response.totalOffline;
           this.totalPercentage = response.totalPercentage;
 
-          // Process LHO list
           this.lhoList = response.lhoDetails.map(lho => ({
             LHO_Name: lho.lho_name,
             lho_id: lho.lho_id,
@@ -120,7 +133,6 @@ export class DashboardComponent implements OnInit {
             offlineCount: lho.offlineCount,
             percentage: lho.percentage
           }));
-
 
           this.lhoList.sort((a, b) => a.LHO_Name.localeCompare(b.LHO_Name));
           this.filteredLhoList = [...this.lhoList];
@@ -133,12 +145,6 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-  filterLhoList() {
-    this.filteredLhoList = this.lhoList.filter(lho =>
-      lho.LHO_Name.toLowerCase().includes(this.searchTerm.toLowerCase())
-    );
-  }
-
   securanceLogin() {
     const loginPayload = {
       email: 'Hitachi.SBI@securens.in',
@@ -148,12 +154,8 @@ export class DashboardComponent implements OnInit {
     this.http.post<{ token: string; services: string }>('https://apip.sspl.securens.in:14333/api/login', loginPayload)
       .subscribe({
         next: (response) => {
-          // Store the token and services in localStorage
           localStorage.setItem('authToken', response.token);
           localStorage.setItem('services', response.services);
-
-          // console.log("Securance token:", localStorage.getItem('authToken'));
-          console.log("Services:", localStorage.getItem('services'));
         },
         error: (error) => {
           console.error('Login error:', error);

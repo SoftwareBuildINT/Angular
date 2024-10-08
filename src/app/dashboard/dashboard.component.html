@@ -47,30 +47,35 @@
         </div>
       </div>
     </div>
+    
     <div class="row align-items-center">
       <div class="col heading-title">
         <h4>LHO Wise List</h4>
       </div>
       <div class="col heading-actions text-right">
+        <!-- Updated Search input for ATM ID -->
         <input
           type="text"
-          class="form-control search-bar d-inline-block"
-          placeholder="Search LHO"
           [(ngModel)]="searchTerm"
-          (input)="filterLhoList()"
+          (input)="filterAtmList()"
+          placeholder="Search for ATM ID..."
         />
+        <!-- Autocomplete suggestions for ATM -->
+        <ul *ngIf="filteredAtmList.length > 0" class="autocomplete-list">
+          <li *ngFor="let atm of filteredAtmList" (click)="selectAtm(atm)">
+            {{ atm }}
+          </li>
+        </ul>
       </div>
     </div>
-
+    
     <!-- Spinner for loading state -->
     <div *ngIf="loading" class="spinner-container">
       <div class="spinner-border" role="status">
         <span class="sr-only">Loading...</span>
       </div>
     </div>
-
-   
-
+    
     <!-- Table content -->
     <div class="row" *ngIf="!loading">
       <div class="card1">
