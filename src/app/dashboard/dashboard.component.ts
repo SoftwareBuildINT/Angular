@@ -23,13 +23,13 @@ export class DashboardComponent implements OnInit {
   totalPercentage: number = 0;
   loading: boolean = true;
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(private router: Router, private http: HttpClient) { }
 
   ngOnInit() {
     this.fetchLhoList();
     this.getUserRole();
     this.securanceLogin();
-    this.fetchAtmList(); 
+    this.fetchAtmList();
   }
 
   getUserRole(): void {
@@ -65,7 +65,7 @@ export class DashboardComponent implements OnInit {
   }
 
   selectAtm(atmId: string) {
-    this.searchTerm = atmId; 
+    this.searchTerm = atmId;
     this.router.navigate(['/liveview'], { queryParams: { atm_id: atmId } });
   }
 
@@ -89,7 +89,7 @@ export class DashboardComponent implements OnInit {
 
   saveLho() {
     if (this.lhoName.trim()) {
-      this.http.post('https://sbi-dashboard-hitachi.ifiber.in:7558/api/add-lho', { lho_name: this.lhoName })
+      this.http.post('http://localhost:7558/add-lho', { lho_name: this.lhoName })
         .subscribe({
           next: (response: any) => {
             alert(response.message || 'LHO saved successfully.');
@@ -117,7 +117,7 @@ export class DashboardComponent implements OnInit {
       totalOffline: number;
       totalPercentage: number;
       lhoDetails: any[];
-    }>('https://sbi-dashboard-hitachi.ifiber.in:7558/api/lho-list')
+    }>('http://localhost:7558/lho-list')
       .subscribe({
         next: (response) => {
           this.totalLocations = response.totalLocations;
