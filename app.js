@@ -691,6 +691,7 @@ app.post('/live-view-links', async (req, res) => {
         }
       };
 
+      // Vendor: Securance
       if (vendorId === 3) {
         try {
           const securanceLogin = `https://apip.sspl.securens.in:14333/api/login`;
@@ -725,7 +726,7 @@ app.post('/live-view-links', async (req, res) => {
 
           const siteDetails = await securanceAllSites();
           const matchedSite = siteDetails.find((site) => site.siteId === atmId);
-          // console.log(matchedSite);
+          console.log(matchedSite);
           if (matchedSite) {
             const config = matchedSite.site_config[0];
             const siteDataToStore = {
@@ -769,6 +770,9 @@ app.post('/live-view-links', async (req, res) => {
             const responseObj = {
               // vendor: vendorId,
               siteId: siteDataToStore.siteId,
+              unitName: matchedSite.address,
+              city: matchedSite.city,
+              state: matchedSite.state,
               camera_1: liveViewLink.rtsp
             };
 
@@ -799,7 +803,9 @@ app.post('/live-view-links', async (req, res) => {
           console.error('Error fetching token from securance:', tokenError);
           return res.status(500).json({ message: 'Error fetching token from securance.' });
         }
-      } else if (vendorId === 1) {
+      }
+      // Vendor: Aniket
+      else if (vendorId === 1) {
         try {
           const aniketAPIData = async () => {
             try {
@@ -814,10 +820,29 @@ app.post('/live-view-links', async (req, res) => {
             }
           };
 
-          const siteDetails = await aniketAPIData();
+          const allSitesData = async () => {
+            try {
+              const response = await axios({
+                method: 'get',
+                url: `https://aapl.birdsi.in/Birds-i_HITACHI_DASHBOARD_API/api/SiteDetailsAll`
+              });
+              return response.data;
+            } catch (error) {
+              console.error('Error fetching data from API:', error);
+              throw new Error('Failed to fetch data from external API');
+            }
+          };
 
-          // Parse the response string to a JSON object
+          const siteDetails = await aniketAPIData();
+          const allSites = await allSitesData();
+
+          const parsedSiteData = JSON.parse(allSites);
           const parsedData = JSON.parse(siteDetails);
+
+          const matchedSite = parsedSiteData.find((site) => site.ATM_ID === atmId);
+
+          // console.log(matchedSite);
+          // Parse the response string to a JSON object
           // console.log(parsedData);
 
           if (parsedData && parsedData.length > 0) {
@@ -834,7 +859,10 @@ app.post('/live-view-links', async (req, res) => {
 
             const responseObj = {
               atmId: atmId,
-              ...cameras
+              ...cameras,
+              unitname: matchedSite.unitname,
+              city: matchedSite.city,
+              state: matchedSite.state,
             };
             console.log(responseObj);
 
@@ -848,7 +876,7 @@ app.post('/live-view-links', async (req, res) => {
               rtspUrl: rtspUrl
             };
 
-            console.log(payload);
+            // console.log(payload);
 
             const convertHLS = await generateHLS(payload);
             console.log(`Converting to hls: ${convertHLS}`);
@@ -865,7 +893,9 @@ app.post('/live-view-links', async (req, res) => {
             error: error.message
           });
         }
-      } else if (vendorId === 2) {
+      }
+      // Vendor: ITL
+      else if (vendorId === 2) {
         try {
           const itlApiData = await axios.post(
             'https://tom.itlems.com/megaapi/CameraReport',
@@ -886,7 +916,10 @@ app.post('/live-view-links', async (req, res) => {
             if (!atmIdSet.has(site.AtmID)) {
               siteDetails.push({
                 ATM_ID: site.AtmID,
-                cameraId: site.CameraID || 'N/A'
+                cameraId: site.CameraID || 'N/A',
+                unitname: site.BankName || 'No Data',
+                city: site.CityName || 'No Data',
+                state: site.StateName || 'No Data'
               });
               atmIdSet.add(site.AtmID);
             }
@@ -903,17 +936,27 @@ app.post('/live-view-links', async (req, res) => {
               password: ''
             };
 
+            const payloadObj = {
+              camId: matchedSite.cameraId
+            };
+
+            // const stopProcess = await axios.post('http://stream.ssplcms.com:51002/api/stop', payloadObj, {
+            //   headers: { 'Content-Type': 'application/json' }
+            // });
+
+            // console.log('Response from stopping process ITL:', stopProcess.data);
+
             const response = await axios.post('http://stream.ssplcms.com:51002/api/start', payload, {
               headers: { 'Content-Type': 'application/json' }
             });
 
-            res.status(200).json({ liveViewLink: response.data.url });
+            res.status(200).json({ matchedSite, liveViewLink: response.data.url });
           } else {
             res.status(404).json({ message: 'ATM ID not found in ITL API data' });
           }
         } catch (error) {
           console.error('Error fetching data from ITL API:', error.response.data);
-          res.status(500).json({ message: 'Error fetching data from ITL API.' });
+          res.status(500).json({ message: `Error fetching data from ITL API: ${error.response.data}` });
         }
       }
     });
