@@ -28,7 +28,6 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.fetchLhoList();
     this.getUserRole();
-    this.securanceLogin();
     this.fetchAtmList();
   }
 
@@ -145,22 +144,4 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-  securanceLogin() {
-    const loginPayload = {
-      email: 'Hitachi.SBI@securens.in',
-      password: 'E#K89GHp$boss'
-    };
-
-    this.http.post<{ token: string; services: string }>('https://apip.sspl.securens.in:14333/api/login', loginPayload)
-      .subscribe({
-        next: (response) => {
-          localStorage.setItem('authToken', response.token);
-          localStorage.setItem('services', response.services);
-        },
-        error: (error) => {
-          console.error('Login error:', error);
-          alert('Login failed. Please check your credentials.');
-        }
-      });
-  }
 }

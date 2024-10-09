@@ -1,7 +1,7 @@
 import { Component, AfterViewInit, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router'; // To get query parameters
-import { HttpClient, HttpHeaders } from '@angular/common/http'; // To make API calls
-import Hls from 'hls.js'; // Correct import
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import Hls from 'hls.js';
 
 @Component({
   selector: 'app-liveview',
@@ -9,265 +9,59 @@ import Hls from 'hls.js'; // Correct import
   styleUrls: ['./liveview.component.scss']
 })
 
-export class LiveviewComponent implements AfterViewInit, OnInit {
-  atmId: string | null = null; // Variable to store atmId
-  apiResponse: any = null;
+export class LiveviewComponent implements OnInit {
+  atmId: string = '';
+  videoUrl: string = '';
 
-  constructor(private route: ActivatedRoute, private http: HttpClient) { }
+  constructor(
+    private route: ActivatedRoute,
+    private http: HttpClient
+  ) { }
 
-  ngOnInit() {
-    // Access the atmId from the URL
+  ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.atmId = params['atmId'];
+
       if (this.atmId) {
-        this.checkVendorAndLoadStreams();
-      } else {
-        console.error('ATM ID not found in URL');
+        this.loadVideoStream();
+      }else{
+        console.log("ATM ID not found")
       }
     });
   }
 
-  // Function to call API with atmId
-  callApiWithAtmId(atmId: string) {
-    const apiUrl = `http://localhost:7558/securance-site-list/${atmId}`;
+  loadVideoStream(): void {
+    const apiUrl = `http://localhost:7558/live-view-links?atmId=${this.atmId}`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    const token = localStorage.getItem('authToken');
-    const services = localStorage.getItem('services');
+    // Make the API call to get the stream data
+    this.http.post(apiUrl, {headers}).subscribe(response => {
+      // Process response if needed
 
-    const payload = {
-      token: token,
-      services: services
-    };
+      // Set video URL for the HLS stream
+      this.videoUrl = `assets/streams/${this.atmId}/camera_1/output.m3u8`;
 
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    this.http.post(apiUrl, payload, { headers })
-      .subscribe({
-        next: (response: any) => {
-          console.log('API Response:', response);
-          this.apiResponse = response;
-          this.convertAndPlayStreams();
-        },
-        error: (error) => {
-          console.error('Error during API call:', error);
-        }
-      });
-  }
-  // http://localhost:7558/
-  callAniketApiWithAtmId(atmId: string) {
-    const apiUrl = `http://localhost:7558/aniket-rtsp-link/${atmId}`;
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    this.http.post(apiUrl, { headers })
-      .subscribe({
-        next: (response: any) => {
-          console.log('Aniket API Response:', response);
-          this.apiResponse = response; // Store the API response
-
-          if (response && response.cameras) {
-            // Check if cameras is an object
-            if (typeof response.cameras === 'object' && !Array.isArray(response.cameras)) {
-              // Loop through each camera in the response and call the RTSP to HLS conversion function
-              Object.keys(response.cameras).forEach((cameraKey: string) => {
-                const cameraId = cameraKey;  // Use the key as the camera ID
-                const rtspLink = response.cameras[cameraKey]; // Access the RTSP link
-
-                if (cameraId && rtspLink) {
-                  console.log(`Converting RTSP to HLS for Camera ID: ${cameraId}, RTSP Link: ${rtspLink}`);
-                  this.convertRtspToHls(rtspLink, cameraId); // Call the conversion function
-                } else {
-                  console.error('Invalid camera data, missing cameraId or rtsp link');
-                }
-              });
-            } else {
-              console.error('Cameras data is not in the expected format');
-            }
-          }
-        },
-        error: (error) => {
-          console.error('Error during API call:', error);
-        }
-      });
-  }
-
-  // Function to check vendor and decide the next steps
-  checkVendorAndLoadStreams() {
-    const vendorApiUrl = `http://localhost:7558/atm-vendor`;
-
-    // Create the payload with atmId in the body
-    const payload = { atmId: this.atmId };
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    // Make a POST request instead of GET
-    this.http.post(vendorApiUrl, payload, { headers })
-      .subscribe({
-        next: (response: any) => {
-          const vendorId = response.vendor; // Assuming the response contains a vendorId field
-          console.log('Vendor ID:', vendorId);
-
-          if (vendorId === 3) {
-            console.log('Vendor is 3, performing RTSP to HLS conversion');
-            this.callApiWithAtmId(this.atmId);
-          } else if (vendorId === 1) {
-            console.log('Vendor is 1, performing RTSP to HLS conversion');
-            this.callAniketApiWithAtmId(this.atmId);
-          } else if (vendorId === 2) {
-            console.log('Vendor is 2, directly playing streams');
-            this.playStreamsDirectly(); // Use the new polling mechanism here
-          }
-        },
-        error: (error) => {
-          console.error('Error fetching vendor ID:', error);
-        }
-      });
-  }
-
-  // Function to convert RTSP to HLS for vendor 3 and load the stream
-  convertAndPlayStreams() {
-    let rtspLinks: { [key: string]: string } = {};
-
-    for (let i = 1; i <= 4; i++) {
-      const cameraKey = `camera_${i}`;
-      if (this.apiResponse[cameraKey] && this.apiResponse[cameraKey].liveViewLinks) {
-        rtspLinks[cameraKey] = this.apiResponse[cameraKey].liveViewLinks.rtsp;
-      }
-    }
-
-    console.log("RTSP links:", rtspLinks);
-
-    Object.keys(rtspLinks).forEach(cameraKey => {
-      const rtspUrl = rtspLinks[cameraKey];
-      this.convertRtspToHls(rtspUrl, cameraKey);
+      // Load and play the HLS stream
+      this.initHlsStream();
+    }, error => {
+      console.error('Error fetching stream data:', error);
     });
   }
 
-  // Poll for stream file existence and load the stream when available
-  pollStreamFile(cameraKey: string, filePath: string, retryInterval = 5000) {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    // Check if the file exists by calling a backend endpoint
-    const checkUrl = `http://localhost:7558/check-file-exists?path=${filePath}`; // Backend route to check file existence
-
-    this.http.get(checkUrl, { headers })
-      .subscribe({
-        next: (response: any) => {
-          if (response.exists) {
-            // File exists, play the stream
-            console.log(`${filePath} found, playing stream`);
-            this.loadStream(cameraKey, filePath);
-          } else {
-            // File doesn't exist, retry after 5 seconds
-            console.log(`${filePath} not found, retrying in ${retryInterval / 1000} seconds`);
-            setTimeout(() => this.pollStreamFile(cameraKey, filePath), retryInterval);
-          }
-        },
-        error: (error) => {
-          console.error('Error checking file existence:', error);
-          // Retry after 5 seconds on error
-          setTimeout(() => this.pollStreamFile(cameraKey, filePath), retryInterval);
-        }
-      });
-  }
-
-  // Function to directly play streams for other vendors or poll for file creation
-  playStreamsDirectly() {
-    // Define the direct file paths for the camera streams
-    const filePaths = {
-      camera_1: `assets/streams/${this.atmId}/camera_1/output.m3u8`,
-      camera_2: `assets/streams/${this.atmId}/camera_2/output.m3u8`,
-      camera_3: `assets/streams/${this.atmId}/camera_3/output.m3u8`,
-      camera_4: `assets/streams/${this.atmId}/camera_4/output.m3u8`
-    };
-
-    // Poll for each camera stream file
-    Object.keys(filePaths).forEach(cameraKey => {
-      const filePath = filePaths[cameraKey];
-      // console.log("filePath",filePath);
-      // console.log("cameraKey",cameraKey);
-      this.loadStream(cameraKey, filePath);
-    });
-  }
-  // http://localhost:7558/
-  // Convert RTSP to HLS using API and load into video elements
-  convertRtspToHls(rtspUrl: string, cameraId: string) {
-    const apiUrl = `http://localhost:7558/convert-rtsp`;
-
-    const payload = {
-      rtspUrl: rtspUrl,
-      cameraId: cameraId,
-      atmId: this.atmId
-    };
-
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-
-    this.http.post(apiUrl, payload, { headers })
-      .subscribe({
-        next: (response: any) => {
-          console.log('RTSP to HLS conversion successful:', response);
-          const hlsUrl = `assets/streams/${payload.atmId}/${cameraId}/output.m3u8`;
-          this.loadStream(cameraId, hlsUrl);
-        },
-        error: (error) => {
-          console.error('Error during RTSP to HLS conversion:', error);
-        }
-      });
-  }
-
-  // Load the HLS or RTSP stream into video element
-  loadStream(cameraId: string, streamUrl: string) {
-    const videoElementId = `video_${cameraId}`;
-    const video = document.getElementById(videoElementId) as HTMLVideoElement;
+  initHlsStream(): void {
+    const videoElement = document.getElementById('video_camera_1') as HTMLVideoElement;
 
     if (Hls.isSupported()) {
       const hls = new Hls();
-      hls.loadSource(streamUrl);
-      hls.attachMedia(video);
-
-      // Wait for user interaction to start playback
-      document.addEventListener('click', () => {
-        video.muted = true; // Ensure it's muted to bypass autoplay restrictions
-        video.play().catch((error) => {
-          console.error('Autoplay error:', error);
-        });
-      });
-
+      hls.loadSource(this.videoUrl);
+      hls.attachMedia(videoElement);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed, ready to play');
+        videoElement.play();
       });
-
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS error:', data);
-      });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = streamUrl;
-      video.muted = true; // Ensure muted is set
-
-      document.addEventListener('click', () => {
-        video.play().catch((error) => {
-          console.error('Autoplay error:', error);
-        });
-      });
-    } else {
-      console.error('HLS not supported in this browser');
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+      // For Safari native HLS support
+      videoElement.src = this.videoUrl;
+      videoElement.play();
     }
-  }
-
-  // ngAfterViewInit runs after the view has been initialized
-  ngAfterViewInit() {
-    // if (this.atmId) {
-    //   this.callApiWithAtmId(this.atmId);
-    // }
   }
 }

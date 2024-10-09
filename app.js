@@ -557,7 +557,7 @@ app.get('/lho-list', async (req, res) => {
           siteDetails2 = itlApiData.data;
           siteDetails3 = securanceData;
         } catch (error) {
-          console.error('Error fetching data from APIs:', error);
+          console.error('Error fetching data from APIs:', error.url);
         }
       };
 
